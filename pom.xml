@@ -7,10 +7,6 @@
     <name>Axon Server API</name>
     <description>Public API for communication with AxonServer</description>
 
-    <prerequisites>
-        <maven>3.0.0</maven>
-    </prerequisites>
-
     <inceptionYear>2018</inceptionYear>
     <url>https://www.axoniq.io</url>
     <licenses>
