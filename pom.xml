@@ -5,6 +5,24 @@
     <artifactId>axon-server-api</artifactId>
     <version>4.0-SNAPSHOT</version>
 
+    <prerequisites>
+        <maven>3.0.0</maven>
+    </prerequisites>
+
+    <inceptionYear>2018</inceptionYear>
+    <url>https://www.axoniq.io</url>
+    <licenses>
+        <license>
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/AxonIQ/axon-server-api/issues</url>
+    </issueManagement>
+
+
     <build>
         <resources>
             <resource>
@@ -19,6 +37,43 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <uniqueVersion>true</uniqueVersion>
         </snapshotRepository>
+        <repository>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <uniqueVersion>false</uniqueVersion>
+        </repository>
     </distributionManagement>
+
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <!--suppress MavenModelInspection -->
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
