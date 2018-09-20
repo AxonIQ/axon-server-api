@@ -44,6 +44,12 @@
         </repository>
     </distributionManagement>
 
+    <scm>
+        <connection>scm:git:https://github.com/AxonIQ/axon-server-api.git</connection>
+        <developerConnection>scm:git:https://github.com/AxonIQ/axon-server-api.git</developerConnection>
+        <url>https://github.com/AxonIQ/axon-server-api.git</url>
+    </scm>
+
 
     <profiles>
         <profile>
