@@ -17,6 +17,10 @@ service EventStore {
     rpc ListAggregateEvents (GetAggregateEventsRequest) returns (stream Event) {
     }
 
+    // Retrieves the Snapshots for a given aggregate. Results are streamed rather than returned at once.
+    rpc ListAggregateSnapshots (GetAggregateSnapshotsRequest) returns (stream Event) {
+    }
+
     // Retrieves the Events from a given tracking token. Results are streamed rather than returned at once.
     rpc ListEvents (stream GetEventsRequest) returns (stream EventWithToken) {
     }
@@ -105,6 +109,11 @@ message GetAggregateEventsRequest {
     string aggregate_id = 1;
     int64 initialSequence = 2;
     bool allowSnapshots = 3;
+}
+
+message GetAggregateSnapshotsRequest {
+    string aggregate_id = 1;
+    int64 initialSequence = 2;
 }
 
 message GetEventsRequest {
