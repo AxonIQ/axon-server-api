@@ -114,6 +114,8 @@ message GetAggregateEventsRequest {
 message GetAggregateSnapshotsRequest {
     string aggregate_id = 1;
     int64 initialSequence = 2;
+    int64 maxSequence = 3;
+    int32 maxResults = 4;
 }
 
 message GetEventsRequest {
