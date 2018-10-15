@@ -31,7 +31,7 @@ message RequestReconnect {
 
 message PlatformInfo {
     NodeInfo primary = 1;
-    bool redirected = 2;
+    bool same_connection = 2;
 }
 
 message NodeInfo {
