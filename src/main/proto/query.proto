@@ -13,9 +13,9 @@ message QueryProviderOutbound {
     oneof request {
         QuerySubscription subscribe = 1;
         QuerySubscription unsubscribe = 2;
-        FlowControl flowControl = 3;
-        QueryResponse queryResponse = 4;
-        QueryComplete queryComplete = 5;
+        FlowControl flow_control = 3;
+        QueryResponse query_response = 4;
+        QueryComplete query_complete = 5;
         SubscriptionQueryResponse subscription_query_response = 6;
     }
 }
@@ -42,20 +42,21 @@ message QueryRequest {
     map<string, MetaDataValue> meta_data = 5;
     SerializedObject response_type = 6;
     repeated ProcessingInstruction processing_instructions = 7;
-    string clientId = 8;
-    string componentName = 9;
+    string client_id = 8;
+    string component_name = 9;
 }
 
 message QueryResponse {
     /* A message id */
     string message_identifier = 1;
     string error_code = 2;
-    ErrorMessage message = 3;
+    ErrorMessage error_message = 3;
     SerializedObject payload = 4;
     map<string, MetaDataValue> meta_data = 5;
     repeated ProcessingInstruction processing_instructions = 6;
     string request_identifier = 7;
 }
+
 message SubscriptionQuery {
     string subscription_identifier = 1;
     int64 number_of_permits = 2;
@@ -67,20 +68,20 @@ message QueryUpdate {
     string message_identifier = 2;
     SerializedObject payload = 3;
     map<string, MetaDataValue> meta_data = 4;
-    string client_name = 5;
+    string client_id = 5;
     string component_name = 6;
 }
 
 message QueryUpdateComplete {
-    string client_name = 2;
+    string client_id = 2;
     string component_name = 3;
 }
 
 message QueryUpdateCompleteExceptionally {
-    string client_name = 2;
+    string client_id = 2;
     string component_name = 3;
     string error_code = 5;
-    ErrorMessage message = 6;
+    ErrorMessage error_message = 6;
 }
 
 message SubscriptionQueryRequest {
@@ -97,7 +98,7 @@ message SubscriptionQueryResponse {
     string message_identifier = 1;
     string subscription_identifier = 2;
     oneof response {
-        QueryResponse initial_response = 3;
+        QueryResponse initial_result = 3;
         QueryUpdate update = 4;
         QueryUpdateComplete complete = 5;
         QueryUpdateCompleteExceptionally complete_exceptionally = 6;
@@ -109,6 +110,6 @@ message QuerySubscription {
     string query = 2;
     string result_name = 3;
     string component_name = 4;
-    string client_name = 5;
-    int32 nrOfHandlers = 6;
+    string client_id = 5;
+    int32 nr_of_handlers = 6;
 }

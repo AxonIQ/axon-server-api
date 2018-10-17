@@ -12,8 +12,8 @@ message CommandProviderOutbound {
     oneof request {
         CommandSubscription subscribe = 1;
         CommandSubscription unsubscribe = 2;
-        FlowControl flowControl = 3;
-        CommandResponse commandResponse = 4;
+        FlowControl flow_control = 3;
+        CommandResponse command_response = 4;
     }
 }
 
@@ -32,15 +32,15 @@ message Command {
     SerializedObject payload = 4;
     map<string, MetaDataValue> meta_data = 5;
     repeated ProcessingInstruction processing_instructions = 6;
-    string clientId = 7;
-    string componentName = 8;
+    string client_id = 7;
+    string component_name = 8;
 }
 
 message CommandResponse {
     /* A message id */
     string message_identifier = 1;
     string error_code = 2;
-    ErrorMessage message = 3;
+    ErrorMessage error_message = 3;
     SerializedObject payload = 4;
     map<string, MetaDataValue> meta_data = 5;
     repeated ProcessingInstruction processing_instructions = 6;
@@ -51,5 +51,5 @@ message CommandSubscription {
     string message_id = 1;
     string command = 2;
     string component_name = 3;
-    string client_name = 4;
+    string client_id = 4;
 }

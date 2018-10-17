@@ -82,12 +82,10 @@ message ColumnsResponse {
 }
 
 message RowResponse {
-    repeated QueryValue idValues = 1;
-    repeated QueryValue sortValues = 2;
+    repeated QueryValue id_values = 1;
+    repeated QueryValue sort_values = 2;
     map<string, QueryValue> values = 3;
 }
-
-
 
 message ReadHighestSequenceNrRequest {
     string aggregate_id = 1;
@@ -107,22 +105,22 @@ message Confirmation {
 
 message GetAggregateEventsRequest {
     string aggregate_id = 1;
-    int64 initialSequence = 2;
-    bool allowSnapshots = 3;
+    int64 initial_sequence = 2;
+    bool allow_snapshots = 3;
 }
 
 message GetAggregateSnapshotsRequest {
     string aggregate_id = 1;
-    int64 initialSequence = 2;
-    int64 maxSequence = 3;
-    int32 maxResults = 4;
+    int64 initial_sequence = 2;
+    int64 max_sequence = 3;
+    int32 max_results = 4;
 }
 
 message GetEventsRequest {
     int64 tracking_token = 1;
     int64 number_of_permits = 2;
-    string client = 3;
-    string component = 4;
+    string client_id = 3;
+    string component_name = 4;
     string processor = 5;
 }
 
