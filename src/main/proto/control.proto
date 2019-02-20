@@ -23,6 +23,8 @@ message PlatformOutboundInstruction {
         StartEventProcessor start_event_processor = 5;
         ReleaseEventProcessorSegment release_segment = 6;
         RequestEventProcessorInfo request_event_processor_info = 7;
+        SplitEventProcessorSegment split_event_processor_segment = 8;
+        MergeEventProcessorSegment merge_event_processor_segment = 9;
     }
 }
 
@@ -78,4 +80,14 @@ message ReleaseEventProcessorSegment {
 
 message RequestEventProcessorInfo {
     string processor_name = 1;
+}
+
+message SplitEventProcessorSegment {
+    string processor_name = 1;
+    int32 segment_identifier = 2;
+}
+
+message MergeEventProcessorSegment {
+    string processor_name = 1;
+    int32 segment_identifier = 2;
 }
