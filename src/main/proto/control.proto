@@ -55,6 +55,8 @@ message EventProcessorInfo {
         bool caught_up = 2;
         bool replaying = 3;
         int32 one_part_of = 4;
+        int64 token_position = 5;
+        string error_state = 6;
     }
     string processor_name = 1;
     string mode = 2;
