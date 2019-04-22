@@ -47,7 +47,7 @@ message NodeInfo {
 message ClientIdentification {
     string client_id = 1;
     string component_name = 2;
-    ConnectionPreference connection_preference = 3;
+    map<string, string> tags = 3;
 }
 
 message EventProcessorInfo {
@@ -91,14 +91,4 @@ message SplitEventProcessorSegment {
 message MergeEventProcessorSegment {
     string processor_name = 1;
     int32 segment_identifier = 2;
-}
-
-message ConnectionPreference {
-    map<string, ConnectionProperty> properties = 1;
-}
-
-message ConnectionProperty {
-    string value = 1;
-    bool required = 2;
-    int32 weight = 3;
 }
