@@ -47,6 +47,7 @@ message NodeInfo {
 message ClientIdentification {
     string client_id = 1;
     string component_name = 2;
+    map<string, string> tags = 3;
 }
 
 message EventProcessorInfo {
