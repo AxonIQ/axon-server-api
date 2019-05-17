@@ -122,6 +122,7 @@ message GetEventsRequest {
     string client_id = 3;
     string component_name = 4;
     string processor = 5;
+    repeated PayloadDescription blacklist = 6;
 }
 
 message Event {
@@ -143,4 +144,9 @@ message QueryValue {
         bool boolean_value = 3;
         double double_value = 4;
     }
+}
+
+message PayloadDescription {
+    string type = 1;
+    string revision = 2;
 }
