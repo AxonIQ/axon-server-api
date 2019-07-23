@@ -3,6 +3,7 @@ package io.axoniq.axonserver.grpc.event;
 import "common.proto";
 option java_multiple_files = true;
 
+/* Service providing operations against the EventStore functionality of Axon Server */
 service EventStore {
 
     // Accepts a stream of Events returning a Confirmation when completed.
@@ -35,118 +36,229 @@ service EventStore {
     }
 
     // Retrieves the first token available in event store (typically 0). Returns 0 when no events in store.
-    rpc GetFirstToken (GetFirstTokenRequest) returns (TrackingToken) {}
+    rpc GetFirstToken (GetFirstTokenRequest) returns (TrackingToken) {
+    }
 
     // Retrieves the last committed token in event store. Returns -1 when no events in store.
-    rpc GetLastToken (GetLastTokenRequest) returns (TrackingToken) {}
+    rpc GetLastToken (GetLastTokenRequest) returns (TrackingToken) {
+    }
 
     // Retrieves the token of the first token of an event from specified time in event store. Returns -1 when no events in store.
-    rpc GetTokenAt (GetTokenAtRequest) returns (TrackingToken) {}
+    rpc GetTokenAt (GetTokenAtRequest) returns (TrackingToken) {
+    }
 }
 
+/* Request message to receive the first Token (Tail Token) of the Event Stream */
 message GetFirstTokenRequest {
 }
 
+/* Request message to receive the last Token (Head Token) of the Event Stream */
 message GetLastTokenRequest {
 }
 
+/* Request message to receive the Token that starts streaming events from the given timestamp */
 message GetTokenAtRequest {
+
+    /* Timestamp expressed as milliseconds since epoch */
     int64 instant = 1;
 }
 
+/* Message containing the information necessary to track the position of events in the Event Stream */
 message TrackingToken {
+
+    /* The value of the Token */
     int64 token = 1;
 }
 
+/* Message wrapping an Event and a Tracking Token */
 message EventWithToken {
+
+    /* The Token representing the position of this Event in the Stream */
     int64 token = 1;
+
+    /* The actual Event Message */
     Event event = 2;
 }
 
+/* Message providing the parameters for executing a Query against AxonServer. */
 message QueryEventsRequest {
+
+    /* The query to execute against the Event Stream */
     string query = 1;
+
+    /* The number of results AxonServer may send before new permits need to be provided */
     int64 number_of_permits = 2;
+
+    /* Whether to keep the query running against incoming events once the Head of the Stream is reached */
     bool live_events = 3;
 }
 
+/* A message describing a response to a Query request */
 message QueryEventsResponse {
+    /* The actual contents of this response */
     oneof data {
+        /* Provided when the response contains the names of the columns the response contains. This message typically arrives first. */
         ColumnsResponse columns = 1;
+
+        /* Provided when the response message contains results of the Query  */
         RowResponse row = 2;
+
+        /* Provided when all historic events have been included in the query results */
         Confirmation files_completed = 3;
     }
 }
 
+/* Message containing the names of the columns returned in a Query */
 message ColumnsResponse {
+
+    /* The names of the columns provided in the query */
     repeated string column = 1;
 }
 
+/* Message providing Query Result data */
 message RowResponse {
+
+    /* The values which, when combined, uniquely update this row. Any previously received values with the same identifiers should be replaced with this value */
     repeated QueryValue id_values = 1;
+
+    /* The sorting values to use when sorting this response compared to the others. */
     repeated QueryValue sort_values = 2;
+
+    /* The actual data values for each of the columns, as a column name -> value mapping */
     map<string, QueryValue> values = 3;
 }
 
+/* Describes the combination of an Aggregate Identifier and first expected Sequence number when opening an Aggregate-specific Event Stream */
 message ReadHighestSequenceNrRequest {
+    /* The Identifier of the Aggregate for which to load events */
     string aggregate_id = 1;
+
+    /* The Sequence Number of the first event expected */
     int64 from_sequence_nr = 3;
 }
 
+/* The highest Sequence Number found for the provided request*/
 message ReadHighestSequenceNrResponse {
+
+    /* The sequence number of the latest event */
     int64 to_sequence_nr = 1;
 }
 
-message RetrieveClusterInfoRequest {
-}
-
+/* A confirmation to a request from the client */
 message Confirmation {
+
+    /* True when successful, otherwise false */
     bool success = 1;
 }
 
+/* Request describing the desire to read events for a specific Aggregate */
 message GetAggregateEventsRequest {
+
+    /* The identifier of the aggregate to read events for */
     string aggregate_id = 1;
+
+    /* The sequence number of the first event to receive */
     int64 initial_sequence = 2;
+
+    /* Whether a snapshot may be returned as first element in the stream */
     bool allow_snapshots = 3;
 }
 
+/* Request message to retrieve Snapshot Events for a specific Aggregate instance */
 message GetAggregateSnapshotsRequest {
+
+    /* The identifier to fetch the snapshots for */
     string aggregate_id = 1;
+
+    /* The minimal sequence number of the snapshots to retrieve */
     int64 initial_sequence = 2;
+
+    /* The maximum sequence number of the snapshots to retrieve */
     int64 max_sequence = 3;
+
+    /* The maximum number of results to stream */
     int32 max_results = 4;
 }
 
+/* Request message to open an Event Stream from the Event Store. */
 message GetEventsRequest {
+
+    /* The token to start streaming from */
     int64 tracking_token = 1;
+
+    /* The number of messages the server may send before it needs to wait for more permits */
     int64 number_of_permits = 2;
+
+    /* The unique identifier of this client instance. Used for monitoring. */
     string client_id = 3;
+
+    /* The component name of this client instance. Used for monitoring. */
     string component_name = 4;
+
+    /* The name of the processor requesting this stream. Used for monitoring. */
     string processor = 5;
+
+    /* An enumeration of payload types that need to be blacklisted. The Server will stop sending messages of these
+       types in order to reduce I/O. Note that the Server may occasionally send a blacklisted message to prevent
+       time-outs and stale tokens on clients.
+     */
     repeated PayloadDescription blacklist = 6;
 }
 
+/* Message containing the information of an Event */
 message Event {
-    /* A message id */
+
+    /* The unique identifier of this event */
     string message_identifier = 1;
+
+    /* The identifier of the Aggregate instance that published this event, if any */
     string aggregate_identifier = 2;
+
+    /* The sequence number of the Event in the Aggregate instance that published it, if any */
     int64 aggregate_sequence_number = 3;
+
+    /* The Type of the Aggregate instance that published this Event, if any */
     string aggregate_type = 4;
+
+    /* The timestamp of the Event */
     int64 timestamp = 5;
+
+    /* The Payload of the Event */
     SerializedObject payload = 6;
+
+    /* The Meta Data of the Event */
     map<string, MetaDataValue> meta_data = 7;
+
+    /* Flag indicating whether the Event is a snapshot Event */
     bool snapshot = 8;
 }
 
+/* Value used in Query Responses to represent a value in its original type */
 message QueryValue {
+
+    /* The actual value, which can be one of string, 64 bit signed integer, boolean or 64 bits floating point */
     oneof data {
+
+        /* The text value */
         string text_value = 1;
+
+        /* The (64 bits) integer value */
         sint64 number_value = 2;
+
+        /* The boolean value */
         bool boolean_value = 3;
+
+        /* The (64 bits) floating point value */
         double double_value = 4;
     }
 }
 
+/* Description of a Payload Type */
 message PayloadDescription {
+
+    /* The type identifier of the Payload */
     string type = 1;
+
+    /* The revision of the Payload Type */
     string revision = 2;
 }
