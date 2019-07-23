@@ -3,53 +3,116 @@ package io.axoniq.axonserver.grpc.command;
 import "common.proto";
 option java_multiple_files = true;
 
+/* The CommandService defines the gRPC requests necessary for subscribing command handlers, and dispatching commands. */
 service CommandService {
-    rpc OpenStream( stream CommandProviderOutbound) returns (stream CommandProviderInbound) {}
-    rpc Dispatch( Command) returns (CommandResponse) {}
+
+    /* Opens a stream allowing clients to register command handlers and receive commands. */
+    rpc OpenStream (stream CommandProviderOutbound) returns (stream CommandProviderInbound) {
+    }
+
+    /* Dispatches the given command, returning the result of command execution */
+    rpc Dispatch (Command) returns (CommandResponse) {
+    }
 }
 
+/* An instruction from the components that provides the Command Handler towards AxonServer. */
 message CommandProviderOutbound {
+
+    /* The instruction for AxonServer */
     oneof request {
+
+        /* Instruction to subscribe this component as handler of a specific type of command */
         CommandSubscription subscribe = 1;
+
+        /* Instruction to unsubscribe this component as handler of a specific type of command */
         CommandSubscription unsubscribe = 2;
+
+        /* Instruction to increase the number of instructions AxonServer may send to this component */
         FlowControl flow_control = 3;
+
+        /* Sends a result of Command processing */
         CommandResponse command_response = 4;
     }
 }
 
+/* An instruction or confirmation from AxonServer towards the component that provides the Command Handler */
 message CommandProviderInbound {
+    /* The instruction from AxonServer for this component */
     oneof request {
+
+        /* An acknowledgement of an instruction sent via the Outbound channel */
         Confirmation confirmation = 1;
+
+        /* A command for this component to process */
         Command command = 2;
     }
 }
 
+/* A message representing a Command that needs to be routed to a component capable of handling it */
 message Command {
-    /* A message id */
+
+    /* The unique identifier of the Command Message */
     string message_identifier = 1;
+
+    /* The name of the command, used for routing it to a destination capable of handling it */
     string name = 2;
+
+    /* The time at which the command was dispatched */
     int64 timestamp = 3;
+
+    /* The payload of the Command, providing details on the instructions for the recipient */
     SerializedObject payload = 4;
+
+    /* Meta Data entries of the Command Message, providing contextual information to the recipient */
     map<string, MetaDataValue> meta_data = 5;
+
+    /* Instructions for AxonServer when routing this Command Message */
     repeated ProcessingInstruction processing_instructions = 6;
+
+    /* The unique identifier of the component dispatching this message */
     string client_id = 7;
+
+    /* The name/type of the component dispatching this message */
     string component_name = 8;
 }
 
+/* Message representing the result of Command Handler execution */
 message CommandResponse {
-    /* A message id */
+
+    /* The unique identifier of the response message */
     string message_identifier = 1;
+
+    /* An error code describing the error, if any */
     string error_code = 2;
+
+    /* A detailed description of the error */
     ErrorMessage error_message = 3;
+
+    /* The payload to provide as a result to the dispatcher */
     SerializedObject payload = 4;
+
+    /* Any meta data entries providing contextual information back to the dispatcher */
     map<string, MetaDataValue> meta_data = 5;
+
+    /* Instructions for AxonServer when routing this Command Response Message */
     repeated ProcessingInstruction processing_instructions = 6;
+
+    /* The unique identifier of the Command Message for which this is the response */
     string request_identifier = 7;
 }
 
+/* Message describing a component's capability of handling a command type */
 message CommandSubscription {
+    /* A unique identifier for this subscription. This identifier is returned in Acknowledgements to allow
+    pipelining of subscription messages */
     string message_id = 1;
+
+    /* The name of the command the component can handle */
     string command = 2;
+
+    /* The name/type of the component handling the command */
     string component_name = 3;
+
+    /* The unique identifier of the component instance subscribing */
     string client_id = 4;
 }

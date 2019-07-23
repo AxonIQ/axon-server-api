@@ -3,113 +3,268 @@ package io.axoniq.axonserver.grpc.query;
 import "common.proto";
 option java_multiple_files = true;
 
+/* Service providing operations for the Query Messaging component of AxonServer */
 service QueryService {
-    rpc OpenStream (stream QueryProviderOutbound) returns (stream QueryProviderInbound) {}
-    rpc Query (QueryRequest) returns (stream QueryResponse) {}
-    rpc Subscription (stream SubscriptionQueryRequest) returns (stream SubscriptionQueryResponse){}
+
+    /* Opens a Query- and Instruction stream to AxonServer. */
+    rpc OpenStream (stream QueryProviderOutbound) returns (stream QueryProviderInbound) {
+    }
+
+    /* Sends a point-to-point or scatter-gather Query */
+    rpc Query (QueryRequest) returns (stream QueryResponse) {
+    }
+
+    /* Opens a Subscription Query */
+    rpc Subscription (stream SubscriptionQueryRequest) returns (stream SubscriptionQueryResponse) {
+    }
 }
 
+/* Message containing Query related instructions for Axon Server */
 message QueryProviderOutbound {
+
+    /* The actual instruction to send */
     oneof request {
+
+        /* Registers a Query Handler with AxonServer */
         QuerySubscription subscribe = 1;
+
+        /* Unregisters a Query Handler with AxonServer */
         QuerySubscription unsubscribe = 2;
+
+        /* Grant permits to AxonServer to send a number of messages to the client */
         FlowControl flow_control = 3;
+
+        /* Sends a Response to a Query received via the inbound stream */
         QueryResponse query_response = 4;
+
+        /* Indicator that all responses for Query have been sent */
         QueryComplete query_complete = 5;
+
+        /* Sends a response for a Subscription Query that have been received via the inbound stream */
         SubscriptionQueryResponse subscription_query_response = 6;
     }
 }
 
+/* Queries or Query related instructions from AxonServer for the connected application */
 message QueryProviderInbound {
+
+    /* The actual query or instruction */
     oneof request {
+
+        /* Confirmation of a request sent towards AxonServer */
         Confirmation confirmation = 1;
+
+        /* Represents an incoming Query, for which this component is expected to provide a response */
         QueryRequest query = 2;
+
+        /* Represents an incoming Subscription Query, for which this component is expected to provide a response and updates */
         SubscriptionQueryRequest subscription_query_request = 3;
     }
 }
 
+/* Message indicating that all available responses to an incoming Query have been provided. */
 message QueryComplete {
+
+    /* A unique identifier for this message */
     string message_id = 1;
+
+    /* The identifier of the incoming query to complete */
     string request_id = 2;
 }
 
+/* Message representing an incoming Query */
 message QueryRequest {
-    /* A message id */
+
+    /* The message ID of the incoming Query */
     string message_identifier = 1;
+
+    /* The name of the Query to execute */
     string query = 2;
+
+    /* The timestamp of the Query creation */
     int64 timestamp = 3;
+
+    /* A payload accompanying the Query */
     SerializedObject payload = 4;
+
+    /* Meta Data providing contextual information of the Query */
     map<string, MetaDataValue> meta_data = 5;
+
+    /* An object describing the expectations of the Response Type */
     SerializedObject response_type = 6;
+
+    /* Any instructions for components Routing or Handling the Query */
     repeated ProcessingInstruction processing_instructions = 7;
+
+    /* The unique identifier of the client instance dispatching the query */
     string client_id = 8;
+
+    /* The Name of the Component dispatching the query */
     string component_name = 9;
 }
 
+/* Message that represents the Response to a Query */
 message QueryResponse {
-    /* A message id */
+    /* The unique identifier of the Response Message */
     string message_identifier = 1;
+
+    /* An Error Code identifying the type of error, if any */
     string error_code = 2;
+
+    /* A detailed description of the error, if any */
     ErrorMessage error_message = 3;
+
+    /* The Payload of the Response Message */
     SerializedObject payload = 4;
+
+    /* Any Meta Data describing the context of the Response Message */
     map<string, MetaDataValue> meta_data = 5;
+
+    /* Any instructions for components Routing or Handling the Response Message */
     repeated ProcessingInstruction processing_instructions = 6;
+
+    /* The unique identifier of the Query to which this is a response */
     string request_identifier = 7;
 }
 
+/* Message that represents a Subscription Query */
 message SubscriptionQuery {
+
+    /* A unique identifier for this subscription */
     string subscription_identifier = 1;
+
+    /* The number of messages the Server may send before needing to await additional permits */
     int64 number_of_permits = 2;
+
+    /* The Query describing the desire for information */
     QueryRequest query_request = 3;
+
+    /* A description of the type of Object expected as Update Responses */
     SerializedObject update_response_type = 4;
 }
 
+/* A message containing an Update of a Query Subscription Response */
 message QueryUpdate {
+
+    /* The unique identifier of this Update */
     string message_identifier = 2;
+
+    /* The object representing the Update */
     SerializedObject payload = 3;
+
+    /* Meta Data providing contextual information of the Update */
     map<string, MetaDataValue> meta_data = 4;
+
+    /* The identifier of the Client instance providing the Update */
     string client_id = 5;
+
+    /* The Component Name of the Client providing the Update */
     string component_name = 6;
 }
 
+/* Message indicating that all relevant Updates have been sent for a Subscription Query, and that no further Updates are available */
 message QueryUpdateComplete {
+
+    /* The identifier of the Client instance providing the Update */
     string client_id = 2;
+
+    /* The Component Name of the Client providing the Update */
     string component_name = 3;
 }
 
+/* Message indicating that an Error occurred and that no Updates will sent for a Subscription Query */
 message QueryUpdateCompleteExceptionally {
+
+    /* The identifier of the Client instance providing the Update */
     string client_id = 2;
+
+    /* The Component Name of the Client providing the Update */
     string component_name = 3;
+
+    /* The Code describing the type of Error that occurred */
     string error_code = 5;
+
+    /* A detailed description of the error, if available */
     ErrorMessage error_message = 6;
 }
 
+/* Message describing possible interactions for a Subscription Query */
 message SubscriptionQueryRequest {
+
+    /* The actual request. The Subscription Query is opened using a `subscribe`, which opens the flow of updates. Once
+       successful, the `get_initial_result` retrieves the initial result of the subscription. For the server to send
+       more updates than the initial number of permits, use the `flow_control` request to send more permits.
+     */
     oneof request {
+
+        /* Start a Subscription Query with the given details. */
         SubscriptionQuery subscribe = 1;
+
+        /* Ends a previously started Subscription Query with the given details */
         SubscriptionQuery unsubscribe = 2;
+
+        /* Requests the initial result of a subscription query to be sent. This should always be done after opening the
+           subscription query itself, to remove concurrency conflicts with Update messages.
+         */
         SubscriptionQuery get_initial_result = 3;
+
+        /* Allows the Server to provide additional Updates to be sent. Only the `number_of_permits` field needs to be
+           set on this message.
+         */
         SubscriptionQuery flow_control = 4;
     }
-    string context = 5;
 }
 
+/* Represents a Response Message for a Subscription Query */
 message SubscriptionQueryResponse {
+
+    /* The unique identifier for this message */
     string message_identifier = 1;
+
+    /* The identifier of the subscription query this is a response for */
     string subscription_identifier = 2;
+
+    /* The actual response. The `initial_result` message is sent as a response to `get_initial_result`. An `update`
+       messages are sent for each update available for the query, even before the Initial Result is supplied. The
+       `complete` or `complete_exceptionally` are sent when the publishing side completed the Subscription Query,
+       either regularly (`complete`) or because an error occurred (`complete_exceptionally`).
+     */
     oneof response {
+
+        /* Provides an Initial Response */
         QueryResponse initial_result = 3;
+
+        /* Provides an Update Response */
         QueryUpdate update = 4;
+
+        /* Indicates the Query is complete, and no more Updates will be sent */
         QueryUpdateComplete complete = 5;
+
+        /* Indicates the Query failed exceptionally, and no more Updates will be sent */
         QueryUpdateCompleteExceptionally complete_exceptionally = 6;
     }
 }
 
+/* Message containing details of a Registration of a Query Handler in a component*/
 message QuerySubscription {
+
+    /* The unique identifier of this Message */
     string message_id = 1;
+
+    /* The name of the Query the Handler is subscribed to */
     string query = 2;
+
+    /* The type of Result this Handler produces */
     string result_name = 3;
+
+    /* The name of the Component containing the Query Handler */
     string component_name = 4;
+
+    /* The unique identifier of the Client Instance containing the Query Handler */
     string client_id = 5;
+
+    /* The number of Query Handlers registered within this Component with the same details. This number is used to
+       calculate the number of candidates for Scatter-Gather Queries.
+     */
     int32 nr_of_handlers = 6;
 }

@@ -2,50 +2,102 @@ syntax = "proto3";
 package io.axoniq.axonserver.grpc;
 option java_multiple_files = true;
 
+/* Describes a serialized object */
 message SerializedObject {
+
+    /* The type identifier of the serialized object. */
     string type = 1;
+
+    /* The revision of the serialized form of the given type. */
     string revision = 2;
+
+    /* The actual data representing the object in serialized form. */
     bytes data = 3;
 }
 
+/* The value of a MetaData entry. */
 message MetaDataValue {
+
+    /* The data of the MetaData entry, depending on the type of data it contains. */
     oneof data {
+
+        /* The text value of the Meta Data entry. */
         string text_value = 1;
+
+        /* The numeric value of the Meta Data entry. */
         sint64 number_value = 2;
+
+        /* The boolean value of the Meta Data entry. */
         bool boolean_value = 3;
+
+        /* The floating point value of the Meta Data entry. */
         double double_value = 4;
+
+        /* The binary value of the Meta Data entry. */
         SerializedObject bytes_value = 5;
     }
 }
 
+/* An instruction for routing components when routing or processing a message. */
 message ProcessingInstruction {
+
+    /* The type of processing message. */
     ProcessingKey key = 1;
+
+    /* The value associated with the processing key.  */
     MetaDataValue value = 2;
 }
 
+/* An enumeration of possible keys for processing instructions. */
 enum ProcessingKey {
+
+    /* key indicating that the attached value should be used for consistent routing. */
     ROUTING_KEY = 0;
+
+    /* key indicating that the attached value indicates relative priority of this message. */
     PRIORITY = 1;
+
+    /* key indicating that the accompanied message has a finite validity. The attached value contains the number of milliseconds. */
     TIMEOUT = 2;
+
+    /* key indicating that the requester expects at most the given number of results from this message. Use -1 for unlimited. */
     NR_OF_RESULTS = 3;
-    ORIGINAL_MESSAGE_ID = 4;
-    TARGET_CLIENT = 5;
-    CONTEXT = 6;
+
+    // do not reuse reserved number to ensure forward and backward compatibility
+    reserved 4, 5, 6, 15;
 }
 
+/* Message containing details of an error */
 message ErrorMessage {
+
+    /* A human readable message explaining the error */
     string message = 1;
+
+    /* A description of the location (client component, server) where the error occurred */
     string location = 2;
+
+    /* A collection of messages providing more details about root causes of the error */
     repeated string details = 3;
 }
 
+/* Message used for Flow Control instruction, providing the counterpart with additional permits for sending messages */
 message FlowControl {
-    string message_id = 1;
+
+    reserved 1;
+
+    /* The ClientID of the component providing additional permits */
     string client_id = 2;
+
+    /* The number of permits to provide */
     int64 permits = 3;
 }
 
+/* Message describing a confirmation of a request or instruction */
 message Confirmation {
+
+    /* The identifier of the message to confirm */
     string message_id = 1;
+
+    /* Indicator whether the instruction was handled successfully */
     bool success = 2;
 }

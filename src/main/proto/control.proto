@@ -2,95 +2,186 @@ syntax = "proto3";
 package io.axoniq.axonserver.grpc.control;
 option java_multiple_files = true;
 
-service PlatformService {
-    rpc GetPlatformServer (ClientIdentification) returns (PlatformInfo) {}
+/* Service describing operations for connecting to the AxonServer platform.
 
-    rpc OpenStream( stream PlatformInboundInstruction) returns (stream PlatformOutboundInstruction) {}
+ Clients are expected to use this service on any of the Platform's Admin nodes to obtain connection information of the
+ node that is should set up the actual connection with. On that second node, the clients should open an instruction
+ stream (see OpenStream), so that AxonServer and the client application can exchange information and instructions.
+*/
+service PlatformService {
+
+    /* Obtains connection information for the Server that a Client should use for its connections. */
+    rpc GetPlatformServer (ClientIdentification) returns (PlatformInfo) {
+    }
+
+    /* Opens an instruction stream to the Platform, allowing AxonServer to provide management instructions to the application */
+    rpc OpenStream (stream PlatformInboundInstruction) returns (stream PlatformOutboundInstruction) {
+    }
 }
 
+/* An instruction from Application Node to the AxonServer platform */
 message PlatformInboundInstruction {
+    /* The actual instruction to send */
     oneof request {
+
+        /* Information about the client being connected.
+           This information is used by AxonServer to monitor the topology of connected applications.
+         */
         ClientIdentification register = 1;
+
+        /* Information about Tracking Processors defined in the application.
+           This information is used by AxonServer to monitor the progress of Tracking Processors across instances.
+         */
         EventProcessorInfo event_processor_info = 2;
     }
 }
 
+/* An instruction or information from the AxonServer Platform to the Application Node */
 message PlatformOutboundInstruction {
+
+    /* The actual instruction or information */
     oneof request {
+
+        /* Information provided by AxonServer which provides information about the AxonServer node the application is connected with */
         NodeInfo node_notification = 1;
+
+        /* A request from AxonServer to the Application to migrate its connection to another node.
+           Clients SHOULD honor this request by closing their current connection, and using the GetPlatformServer RPC
+           to request a new destination.
+         */
         RequestReconnect request_reconnect = 3;
-        PauseEventProcessor pause_event_processor = 4;
-        StartEventProcessor start_event_processor = 5;
-        ReleaseEventProcessorSegment release_segment = 6;
-        RequestEventProcessorInfo request_event_processor_info = 7;
-        SplitEventProcessorSegment split_event_processor_segment = 8;
-        MergeEventProcessorSegment merge_event_processor_segment = 9;
+
+        /* Instruction from AxonServer to Pause a Tracking Event Processor. */
+        EventProcessorReference pause_event_processor = 4;
+
+        /* Instruction from AxonServer to Start a Tracking Event Processor. */
+        EventProcessorReference start_event_processor = 5;
+
+        /* Instruction from AxonServer to Release a specific segment in a Tracking Event Processor */
+        EventProcessorSegmentReference release_segment = 6;
+
+        /* A request from AxonServer for status information of a specific Tracking Event Processor */
+        EventProcessorReference request_event_processor_info = 7;
+
+        /* Instruction to split a Segment in a Tracking Event Processor */
+        EventProcessorSegmentReference split_event_processor_segment = 8;
+
+        /* Instruction to merge two Segments in a Tracking Event Processor */
+        EventProcessorSegmentReference merge_event_processor_segment = 9;
     }
 }
 
+/* Message send when AxonServer requests the client to re-establish its connection with the Platform */
 message RequestReconnect {
 }
 
+/* Message containing connection information of the node to Connect with */
 message PlatformInfo {
+
+    /* The connection details of the node the client should connect with */
     NodeInfo primary = 1;
+
+    /* Flag indicating that the connection may be reused to connect. When true, the client _may_ reuse the connection
+       established for the GetPlatformServer request for subsequent requests.
+     */
     bool same_connection = 2;
 }
 
+/* Message containing connection information for an AxonServer Node */
 message NodeInfo {
+
+    /* The host name to use when connecting to this node */
     string host_name = 1;
+
+    /* The port number for gRPC connections */
     int32 grpc_port = 2;
+
+    /* The port number for HTTP connections */
     int32 http_port = 3;
+
+    /* The version identifier of the API */
     int32 version = 4;
+
+    /* The unique name of the node to connect with, for purpose of debugging */
     string node_name = 5;
 }
 
+/* Message containing details about the Client Application */
 message ClientIdentification {
+
+    /* A unique identifier for this client instance. Is used to distinguish different instances of the same component */
     string client_id = 1;
+
+    /* The name of the component. Several instances of the same component should share this name */
     string component_name = 2;
+
+    /* Any tags associated with the client, which may provide hints and preferences for setting up connections */
     map<string, string> tags = 3;
 }
 
+/* Message containing information about the status of a Tracking Event Processor */
 message EventProcessorInfo {
-    message EventTrackerInfo {
+
+    /* Message containing information about the status of a Segment of a Tracking Event Processor */
+    message SegmentStatus {
+        /* The ID of the Segment for which the status is reported */
         int32 segment_id = 1;
+
+        /* Indicates whether the Segment has "Caught Up" with the Head of the Event Stream */
         bool caught_up = 2;
+
+        /* Indicates whether the Segment is "Replaying" historic events after a Reset. */
         bool replaying = 3;
+
+        /* The fraction this segment processes. A fraction of 2 means 1/2, 4 means 1/4, etc.*/
         int32 one_part_of = 4;
+
+        /* The approximate position of the token in the stream. */
         int64 token_position = 5;
+
+        /* Information about the error state of the Segment, if applicable. */
         string error_state = 6;
     }
+
+    /* The logical name of this processor. */
     string processor_name = 1;
+
+    /* The mode in which this processor is reading Events, for example: 'Tracking' or 'Subscribing' */
     string mode = 2;
+
+    /* The number of threads currently actively processing Events */
     int32 active_threads = 3;
+
+    /* Flag indicating whether the processor is running */
     bool running = 4;
+
+    /* Flag indicating whether the processor, when stopped, did so because of an irrecoverable Error */
     bool error = 5;
-    repeated EventTrackerInfo event_trackers_info = 6;
+
+    /* Status details of each of the Segment for which Events are being processed. This is only provided by Tracking
+       Event Processors.
+     */
+    repeated SegmentStatus segment_status = 6;
+
+    /* The number of threads the processor has available to assign to Segments.
+       Will report 0 is all threads are assigned a Segment.
+     */
     int32 available_threads = 7;
 }
 
-message PauseEventProcessor {
+/* Message providing reference to an Event Processor */
+message EventProcessorReference {
+
+    /* The name of the Event Processor */
     string processor_name = 1;
 }
 
-message StartEventProcessor {
-    string processor_name = 1;
-}
+/* Message providing reference to a Segment of an Event Processor */
+message EventProcessorSegmentReference {
 
-message ReleaseEventProcessorSegment {
+    /* The name of the Event Processor */
     string processor_name = 1;
-    int32 segment_identifier = 2;
-}
 
-message RequestEventProcessorInfo {
-    string processor_name = 1;
-}
-
-message SplitEventProcessorSegment {
-    string processor_name = 1;
-    int32 segment_identifier = 2;
-}
-
-message MergeEventProcessorSegment {
-    string processor_name = 1;
+    /* The identifier of the Segment */
     int32 segment_identifier = 2;
 }
