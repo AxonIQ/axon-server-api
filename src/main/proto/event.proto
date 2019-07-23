@@ -93,7 +93,7 @@ message QueryEventsRequest {
     bool live_events = 3;
 }
 
-/* A message describing the a response to a Query request */
+/* A message describing a response to a Query request */
 message QueryEventsResponse {
     /* The actual contents of this response */
     oneof data {
@@ -128,7 +128,7 @@ message RowResponse {
     map<string, QueryValue> values = 3;
 }
 
-/* Describins the combination of an Aggregate Identifier and first expected Sequence number when opening an Aggregate-specific Event Stream */
+/* Describes the combination of an Aggregate Identifier and first expected Sequence number when opening an Aggregate-specific Event Stream */
 message ReadHighestSequenceNrRequest {
     /* The Identifier of the Aggregate for which to load events */
     string aggregate_id = 1;
@@ -214,7 +214,7 @@ message Event {
     /* The identifier of the Aggregate instance that published this event, if any */
     string aggregate_identifier = 2;
 
-    /* The sequence number of the Event in the of the Aggregate instance that published it, if any */
+    /* The sequence number of the Event in the Aggregate instance that published it, if any */
     int64 aggregate_sequence_number = 3;
 
     /* The Type of the Aggregate instance that published this Event, if any */

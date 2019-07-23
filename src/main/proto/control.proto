@@ -5,7 +5,7 @@ option java_multiple_files = true;
 /* Service describing operations for connecting to the AxonServer platform.
 
  Clients are expected to use this service on any of the Platform's Admin nodes to obtain connection information of the
- node that is should set up the actual connection with. On that second node, the clients should open an instruction
+ node that it should set up the actual connection with. On that second node, the clients should open an instruction
  stream (see OpenStream), so that AxonServer and the client application can exchange information and instructions.
 */
 service PlatformService {
@@ -158,13 +158,13 @@ message EventProcessorInfo {
     /* Flag indicating whether the processor, when stopped, did so because of an irrecoverable Error */
     bool error = 5;
 
-    /* Status details of each of the Segment for which Events are being processed. This is only provided by Tracking
+    /* Status details of each of the Segments for which Events are being processed. This is only provided by Tracking
        Event Processors.
      */
     repeated SegmentStatus segment_status = 6;
 
     /* The number of threads the processor has available to assign to Segments.
-       Will report 0 is all threads are assigned a Segment.
+       Will report 0 if all threads are assigned a Segment.
      */
     int32 available_threads = 7;
 }
