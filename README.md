@@ -4,9 +4,9 @@ This module contains the protobuf definitions of the services and messages provi
 AxonServer.
 
 The API definitions are structured around 5 files:
-- `command.proto` - contains the service and message definitions specific to the dispatching and handling of commands.
 - `common.proto` - contains messages commonly used throughout the services
 - `control.proto` - contains services and messages to monitor and control application components
+- `command.proto` - contains the service and message definitions specific to the dispatching and handling of commands.
 - `event.proto` - contains services and messages for publishing and consuming events
 - `query.proto` - contains services and messages for dispatching and handling queries
 
@@ -27,7 +27,7 @@ If security is enabled on AxonServer, a security header also needs to attached t
 ### Connecting to AxonServer
 
 In a cluster of AxonServer nodes, not every node has the same role. That means that not every node may be suitable
-to serve as a connection counterpart of every application. Therefore, connecting to AxonServer is a
+to serve as a connection counterpart to every application. Therefore, connecting to AxonServer is a
 two-step process.
 
 The first step is to establish a connection with an "admin" node. These nodes have detailed information about the layout
@@ -64,7 +64,7 @@ ensure these buffers never fill up beyond expected proportions.
 
 When AxonServer has messages to send to a node that doesn't have any permits available, AxonServer will buffer them on 
 the server side. However, those buffers are also limited. Once they fill up, depending on AxonServer settings, either 
-new messages will be rejected (sending errors to the cliens dispatching them), or AxonServer will start adjusting its 
+new messages will be rejected (sending errors to the clients dispatching them), or AxonServer will start adjusting its 
 routing properties to reduce the load on that specific client.
  
 ### Forward and backward compatibility considerations
