@@ -33,6 +33,9 @@ message PlatformInboundInstruction {
            This information is used by AxonServer to monitor the progress of Tracking Processors across instances.
          */
         EventProcessorInfo event_processor_info = 2;
+
+        /* This heartbeat is used by AxonServer in order to check the connection is still alive*/
+        Heartbeat heartbeat = 3;
     }
 }
 
@@ -184,4 +187,7 @@ message EventProcessorSegmentReference {
 
     /* The identifier of the Segment */
     int32 segment_identifier = 2;
+}
+
+message Heartbeat {
 }
