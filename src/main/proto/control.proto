@@ -71,6 +71,9 @@ message PlatformOutboundInstruction {
 
         /* Instruction to merge two Segments in a Tracking Event Processor */
         EventProcessorSegmentReference merge_event_processor_segment = 9;
+
+        /* This heartbeat is used by AxonFramework in order to check the connection is still alive*/
+        Heartbeat heartbeat = 10;
     }
 }
 
