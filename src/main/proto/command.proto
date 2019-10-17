@@ -32,6 +32,9 @@ message CommandProviderOutbound {
 
         /* Sends a result of Command processing */
         CommandResponse command_response = 4;
+
+        /* Reports unknown request received from the server-side. */
+        UnknownMessage unknown_request = 5;
     }
 }
 
@@ -45,6 +48,9 @@ message CommandProviderInbound {
 
         /* A command for this component to process */
         Command command = 2;
+
+        /* Reports unknown request received from the client-side. */
+        UnknownMessage unknown_request = 3;
     }
 }
 
