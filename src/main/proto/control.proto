@@ -39,7 +39,7 @@ message PlatformInboundInstruction {
         Heartbeat heartbeat = 3;
 
         /* Reports unknown instruction received from the client-side. */
-        UnknownMessage unknownInstruction = 4;
+        UnknownMessage unknown_instruction = 4;
     }
 }
 
@@ -80,7 +80,7 @@ message PlatformOutboundInstruction {
         Heartbeat heartbeat = 10;
 
         /* Reports unknown instruction received from the server-side. */
-        UnknownMessage unknownInstruction = 11;
+        UnknownMessage unknown_instruction = 11;
     }
 }
 
