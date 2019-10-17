@@ -1,5 +1,6 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc;
+import "google/protobuf/any.proto";
 option java_multiple_files = true;
 
 /* Describes a serialized object */
@@ -100,4 +101,14 @@ message Confirmation {
 
     /* Indicator whether the instruction was handled successfully */
     bool success = 2;
+}
+
+/* Sent from receiving side when it does not understand the request. */
+message UnknownMessage {
+
+    /* The actual message that was unknown to the client. */
+    google.protobuf.Any message = 1;
+
+    /* Additional details. */
+    string details = 2;
 }
