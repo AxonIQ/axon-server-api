@@ -1,5 +1,6 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.control;
+import "common.proto";
 option java_multiple_files = true;
 
 /* Service describing operations for connecting to the AxonServer platform.
@@ -36,6 +37,9 @@ message PlatformInboundInstruction {
 
         /* This heartbeat is used by AxonServer in order to check if the connection is still alive*/
         Heartbeat heartbeat = 3;
+
+        /* Reports unknown instruction received from the client-side. */
+        UnknownMessage unknownInstruction = 4;
     }
 }
 
@@ -74,6 +78,9 @@ message PlatformOutboundInstruction {
 
         /* This heartbeat is used by AxonFramework in order to check if the connection is still alive*/
         Heartbeat heartbeat = 10;
+
+        /* Reports unknown instruction received from the server-side. */
+        UnknownMessage unknownInstruction = 11;
     }
 }
 
