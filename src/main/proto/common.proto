@@ -104,7 +104,7 @@ message Confirmation {
 }
 
 /* Sent from receiving side when it does not understand the request. */
-message UnknownMessage {
+message UnknownRequest {
 
     /* The actual message that was unknown to the client. */
     google.protobuf.Any message = 1;

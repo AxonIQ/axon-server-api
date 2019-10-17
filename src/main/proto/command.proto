@@ -34,7 +34,7 @@ message CommandProviderOutbound {
         CommandResponse command_response = 4;
 
         /* Reports unknown request received from the server-side. */
-        UnknownMessage unknown_request = 5;
+        UnknownRequest unknown_request = 5;
     }
 }
 
@@ -50,7 +50,7 @@ message CommandProviderInbound {
         Command command = 2;
 
         /* Reports unknown request received from the client-side. */
-        UnknownMessage unknown_request = 3;
+        UnknownRequest unknown_request = 3;
     }
 }
 
