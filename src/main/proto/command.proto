@@ -33,9 +33,12 @@ message CommandProviderOutbound {
         /* Sends a result of Command processing */
         CommandResponse command_response = 4;
 
-        /* Reports unknown request received from the server-side. */
-        UnknownRequest unknown_request = 5;
+        /* Represents a result of previously sent instruction */
+        Confirmation result = 5;
     }
+
+    /* Message identifier */
+    string message_id = 6;
 }
 
 /* An instruction or confirmation from AxonServer towards the component that provides the Command Handler */
@@ -48,10 +51,10 @@ message CommandProviderInbound {
 
         /* A command for this component to process */
         Command command = 2;
-
-        /* Reports unknown request received from the client-side. */
-        UnknownRequest unknown_request = 3;
     }
+
+    /* Message identifier */
+    string message_id = 3;
 }
 
 /* A message representing a Command that needs to be routed to a component capable of handling it */

@@ -100,15 +100,21 @@ message Confirmation {
     string message_id = 1;
 
     /* Indicator whether the instruction was handled successfully */
-    bool success = 2;
+    bool success = 2 [deprecated=true];
+
+    /* Result of instruction execution */
+    RequestResult result = 3;
 }
 
-/* Sent from receiving side when it does not understand the request. */
-message UnknownRequest {
+/* Result of instruction execution */
+enum RequestResult {
 
-    /* The actual message that was unknown to the client. */
-    google.protobuf.Any message = 1;
+    /* Successful instruction execution */
+    SUCCESS = 0;
 
-    /* Additional details. */
-    string details = 2;
+    /* Unsuccessful instruction execution */
+    FAILURE = 1;
+
+    /* Instruction is not supported */
+    NOT_SUPPORTED = 2;
 }

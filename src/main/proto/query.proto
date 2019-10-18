@@ -43,9 +43,12 @@ message QueryProviderOutbound {
         /* Sends a response for a Subscription Query that has been received via the inbound stream */
         SubscriptionQueryResponse subscription_query_response = 6;
 
-        /* Reports unknown request received from the server-side. */
-        UnknownRequest unknown_request = 7;
+        /* Result of previously sent Outbound instruction */
+        Confirmation result = 7;
     }
+
+    /* Message identifier */
+    string message_id = 8;
 }
 
 /* Queries or Query related instructions from AxonServer for the connected application */
@@ -62,10 +65,10 @@ message QueryProviderInbound {
 
         /* Represents an incoming Subscription Query, for which this component is expected to provide a response and updates */
         SubscriptionQueryRequest subscription_query_request = 3;
-
-        /* Reports unknown request received from the client-side. */
-        UnknownRequest unknown_request = 8;
     }
+
+    /* Message identifier */
+    string message_id = 4;
 }
 
 /* Message indicating that all available responses to an incoming Query have been provided. */

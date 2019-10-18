@@ -38,9 +38,12 @@ message PlatformInboundInstruction {
         /* This heartbeat is used by AxonServer in order to check if the connection is still alive*/
         Heartbeat heartbeat = 3;
 
-        /* Reports unknown instruction received from the client-side. */
-        UnknownRequest unknown_instruction = 4;
+        /* Result of previously sent instruction via outbound stream */
+        Confirmation result = 4;
     }
+
+    /* Message identifier */
+    string message_id = 5;
 }
 
 /* An instruction or information from the AxonServer Platform to the Application Node */
@@ -79,9 +82,12 @@ message PlatformOutboundInstruction {
         /* This heartbeat is used by AxonFramework in order to check if the connection is still alive*/
         Heartbeat heartbeat = 10;
 
-        /* Reports unknown instruction received from the server-side. */
-        UnknownRequest unknown_instruction = 11;
+        /* Result of previously sent instruction via Inbound stream */
+        Confirmation result = 11;
     }
+
+    /* Message identifier */
+    string message_id = 12;
 }
 
 /* Message send when AxonServer requests the client to re-establish its connection with the Platform */
