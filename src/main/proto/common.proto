@@ -79,6 +79,9 @@ message ErrorMessage {
 
     /* A collection of messages providing more details about root causes of the error */
     repeated string details = 3;
+
+    /* An Error Code identifying the type of error */
+    string error_code = 4;
 }
 
 /* Message used for Flow Control instruction, providing the counterpart with additional permits for sending messages */
@@ -94,27 +97,14 @@ message FlowControl {
 }
 
 /* Message describing a confirmation of a request or instruction */
-message Confirmation {
+message InstructionResult {
 
     /* The identifier of the message to confirm */
     string message_id = 1;
 
     /* Indicator whether the instruction was handled successfully */
-    bool success = 2 [deprecated=true];
+    bool success = 2;
 
-    /* Result of instruction execution */
-    RequestResult result = 3;
-}
-
-/* Result of instruction execution */
-enum RequestResult {
-
-    /* Successful instruction execution */
-    SUCCESS = 0;
-
-    /* Unsuccessful instruction execution */
-    FAILURE = 1;
-
-    /* Instruction is not supported */
-    NOT_SUPPORTED = 2;
+    /* Set if instruction handling failed. */
+    ErrorMessage error = 3;
 }

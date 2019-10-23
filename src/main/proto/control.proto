@@ -39,7 +39,7 @@ message PlatformInboundInstruction {
         Heartbeat heartbeat = 3;
 
         /* Result of previously sent instruction via outbound stream */
-        Confirmation result = 4;
+        InstructionResult result = 4;
     }
 
     /* Message identifier */
@@ -83,7 +83,7 @@ message PlatformOutboundInstruction {
         Heartbeat heartbeat = 10;
 
         /* Result of previously sent instruction via Inbound stream */
-        Confirmation result = 11;
+        InstructionResult result = 11;
     }
 
     /* Message identifier */

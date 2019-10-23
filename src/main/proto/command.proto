@@ -34,7 +34,7 @@ message CommandProviderOutbound {
         CommandResponse command_response = 4;
 
         /* Represents a result of previously sent instruction */
-        Confirmation result = 5;
+        InstructionResult result = 5;
     }
 
     /* Message identifier */
@@ -47,7 +47,7 @@ message CommandProviderInbound {
     oneof request {
 
         /* An acknowledgement of an instruction sent via the Outbound channel */
-        Confirmation confirmation = 1;
+        InstructionResult confirmation = 1;
 
         /* A command for this component to process */
         Command command = 2;

@@ -44,7 +44,7 @@ message QueryProviderOutbound {
         SubscriptionQueryResponse subscription_query_response = 6;
 
         /* Result of previously sent Outbound instruction */
-        Confirmation result = 7;
+        InstructionResult result = 7;
     }
 
     /* Message identifier */
@@ -58,7 +58,7 @@ message QueryProviderInbound {
     oneof request {
 
         /* Confirmation of a request sent towards AxonServer */
-        Confirmation confirmation = 1;
+        InstructionResult confirmation = 1;
 
         /* Represents an incoming Query, for which this component is expected to provide a response */
         QueryRequest query = 2;
