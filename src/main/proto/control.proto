@@ -123,6 +123,9 @@ message ClientIdentification {
 
     /* Any tags associated with the client, which may provide hints and preferences for setting up connections */
     map<string, string> tags = 3;
+
+    /* Axon framework version used by the client application instance*/
+    string version = 4;
 }
 
 /* Message containing information about the status of a Tracking Event Processor */
