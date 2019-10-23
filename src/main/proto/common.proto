@@ -96,11 +96,11 @@ message FlowControl {
     int64 permits = 3;
 }
 
-/* Message describing a confirmation of a request or instruction */
+/* Message describing a result of instruction processing */
 message InstructionResult {
 
-    /* The identifier of the message to confirm */
-    string message_id = 1;
+    /* The identifier of the instruction */
+    string instruction_id = 1;
 
     /* Indicator whether the instruction was handled successfully */
     bool success = 2;
