@@ -37,8 +37,8 @@ message CommandProviderOutbound {
         InstructionResult result = 5;
     }
 
-    /* Message identifier */
-    string message_id = 6;
+    /* Instruction identifier */
+    string instruction_id = 6;
 }
 
 /* An instruction or confirmation from AxonServer towards the component that provides the Command Handler */
@@ -53,8 +53,8 @@ message CommandProviderInbound {
         Command command = 2;
     }
 
-    /* Message identifier */
-    string message_id = 3;
+    /* Instruction identifier */
+    string instruction_id = 3;
 }
 
 /* A message representing a Command that needs to be routed to a component capable of handling it */

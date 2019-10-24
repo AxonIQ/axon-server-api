@@ -47,8 +47,8 @@ message QueryProviderOutbound {
         InstructionResult result = 7;
     }
 
-    /* Message identifier */
-    string message_id = 8;
+    /* Instruction identifier */
+    string instruction_id = 8;
 }
 
 /* Queries or Query related instructions from AxonServer for the connected application */
@@ -67,8 +67,8 @@ message QueryProviderInbound {
         SubscriptionQueryRequest subscription_query_request = 3;
     }
 
-    /* Message identifier */
-    string message_id = 4;
+    /* Instruction identifier */
+    string instruction_id = 4;
 }
 
 /* Message indicating that all available responses to an incoming Query have been provided. */

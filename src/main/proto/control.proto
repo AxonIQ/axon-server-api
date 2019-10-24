@@ -42,8 +42,8 @@ message PlatformInboundInstruction {
         InstructionResult result = 4;
     }
 
-    /* Message identifier */
-    string message_id = 5;
+    /* Instruction identifier */
+    string instruction_id = 5;
 }
 
 /* An instruction or information from the AxonServer Platform to the Application Node */
@@ -86,8 +86,8 @@ message PlatformOutboundInstruction {
         InstructionResult result = 11;
     }
 
-    /* Message identifier */
-    string message_id = 12;
+    /* Instruction identifier */
+    string instruction_id = 12;
 }
 
 /* Message send when AxonServer requests the client to re-establish its connection with the Platform */
