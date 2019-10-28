@@ -43,7 +43,7 @@ message QueryProviderOutbound {
         /* Sends a response for a Subscription Query that has been received via the inbound stream */
         SubscriptionQueryResponse subscription_query_response = 6;
 
-        /* Result of previously sent Outbound instruction */
+        /* Result of previously sent Inbound instruction */
         InstructionResult result = 7;
     }
 
