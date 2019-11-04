@@ -47,7 +47,7 @@ message CommandProviderInbound {
     oneof request {
 
         /* An acknowledgement of an instruction sent via the Outbound channel */
-        InstructionResult confirmation = 1;
+        InstructionResult result = 1;
 
         /* A command for this component to process */
         Command command = 2;

@@ -58,7 +58,7 @@ message QueryProviderInbound {
     oneof request {
 
         /* Confirmation of a request sent towards AxonServer */
-        InstructionResult confirmation = 1;
+        InstructionResult result = 1;
 
         /* Represents an incoming Query, for which this component is expected to provide a response */
         QueryRequest query = 2;
