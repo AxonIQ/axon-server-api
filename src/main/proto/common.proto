@@ -1,5 +1,6 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc;
+import "google/protobuf/any.proto";
 option java_multiple_files = true;
 
 /* Describes a serialized object */
@@ -78,6 +79,9 @@ message ErrorMessage {
 
     /* A collection of messages providing more details about root causes of the error */
     repeated string details = 3;
+
+    /* An Error Code identifying the type of error */
+    string error_code = 4;
 }
 
 /* Message used for Flow Control instruction, providing the counterpart with additional permits for sending messages */
@@ -92,12 +96,15 @@ message FlowControl {
     int64 permits = 3;
 }
 
-/* Message describing a confirmation of a request or instruction */
-message Confirmation {
+/* Message describing a result of instruction processing */
+message InstructionResult {
 
-    /* The identifier of the message to confirm */
-    string message_id = 1;
+    /* The identifier of the instruction */
+    string instruction_id = 1;
 
     /* Indicator whether the instruction was handled successfully */
     bool success = 2;
+
+    /* Set if instruction handling failed. */
+    ErrorMessage error = 3;
 }

@@ -32,7 +32,13 @@ message CommandProviderOutbound {
 
         /* Sends a result of Command processing */
         CommandResponse command_response = 4;
+
+        /* Represents a result of previously sent instruction */
+        InstructionResult result = 5;
     }
+
+    /* Instruction identifier */
+    string instruction_id = 6;
 }
 
 /* An instruction or confirmation from AxonServer towards the component that provides the Command Handler */
@@ -41,11 +47,14 @@ message CommandProviderInbound {
     oneof request {
 
         /* An acknowledgement of an instruction sent via the Outbound channel */
-        Confirmation confirmation = 1;
+        InstructionResult result = 1;
 
         /* A command for this component to process */
         Command command = 2;
     }
+
+    /* Instruction identifier */
+    string instruction_id = 3;
 }
 
 /* A message representing a Command that needs to be routed to a component capable of handling it */
