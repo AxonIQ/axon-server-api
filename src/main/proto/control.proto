@@ -38,7 +38,7 @@ message PlatformInboundInstruction {
         /* This heartbeat is used by AxonServer in order to check if the connection is still alive*/
         Heartbeat heartbeat = 3;
 
-        /* Acknowledgment result of previously sent instruction via outbound stream */
+        /* Acknowledgement result of previously sent instruction via outbound stream */
         InstructionAck result = 4;
     }
 
@@ -82,7 +82,7 @@ message PlatformOutboundInstruction {
         /* This heartbeat is used by AxonFramework in order to check if the connection is still alive*/
         Heartbeat heartbeat = 10;
 
-        /* Acknowledgment result of previously sent instruction via inbound stream */
+        /* Acknowledgement result of previously sent instruction via inbound stream */
         InstructionAck result = 11;
     }
 

@@ -96,7 +96,7 @@ message FlowControl {
     int64 permits = 3;
 }
 
-/* Message describing instruction acknowledgment */
+/* Message describing instruction acknowledgement */
 message InstructionAck {
 
     /* The identifier of the instruction */
@@ -105,6 +105,6 @@ message InstructionAck {
     /* Indicator whether the instruction was acknowledged successfully */
     bool success = 2;
 
-    /* Set if instruction acknowledgment failed. */
+    /* Set if instruction acknowledgement failed. */
     ErrorMessage error = 3;
 }
