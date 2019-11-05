@@ -33,8 +33,8 @@ message CommandProviderOutbound {
         /* Sends a result of Command processing */
         CommandResponse command_response = 4;
 
-        /* Acknowledgement result of previously sent instruction via inbound stream */
-        InstructionAck result = 5;
+        /* Acknowledgement of previously sent instruction via inbound stream */
+        InstructionAck ack = 5;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via inbound stream */
@@ -46,8 +46,8 @@ message CommandProviderInbound {
     /* The instruction from AxonServer for this component */
     oneof request {
 
-        /* Acknowledgement result of previously sent instruction via outbound stream */
-        InstructionAck result = 1;
+        /* Acknowledgement of previously sent instruction via outbound stream */
+        InstructionAck ack = 1;
 
         /* A command for this component to process */
         Command command = 2;
