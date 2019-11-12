@@ -96,15 +96,15 @@ message FlowControl {
     int64 permits = 3;
 }
 
-/* Message describing a result of instruction processing */
-message InstructionResult {
+/* Message describing instruction acknowledgement */
+message InstructionAck {
 
     /* The identifier of the instruction */
     string instruction_id = 1;
 
-    /* Indicator whether the instruction was handled successfully */
+    /* Indicator whether the instruction was acknowledged successfully */
     bool success = 2;
 
-    /* Set if instruction handling failed. */
+    /* Set if instruction acknowledgement failed. */
     ErrorMessage error = 3;
 }
