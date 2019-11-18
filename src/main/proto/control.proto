@@ -1,5 +1,6 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.control;
+import "common.proto";
 option java_multiple_files = true;
 
 /* Service describing operations for connecting to the AxonServer platform.
@@ -36,7 +37,13 @@ message PlatformInboundInstruction {
 
         /* This heartbeat is used by AxonServer in order to check if the connection is still alive*/
         Heartbeat heartbeat = 3;
+
+        /* Acknowledgement of previously sent instruction via outbound stream */
+        InstructionAck ack = 4;
     }
+
+    /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
+    string instruction_id = 5;
 }
 
 /* An instruction or information from the AxonServer Platform to the Application Node */
@@ -74,7 +81,13 @@ message PlatformOutboundInstruction {
 
         /* This heartbeat is used by AxonFramework in order to check if the connection is still alive*/
         Heartbeat heartbeat = 10;
+
+        /* Acknowledgement of previously sent instruction via inbound stream */
+        InstructionAck ack = 11;
     }
+
+    /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via inbound stream */
+    string instruction_id = 12;
 }
 
 /* Message send when AxonServer requests the client to re-establish its connection with the Platform */
@@ -123,6 +136,9 @@ message ClientIdentification {
 
     /* Any tags associated with the client, which may provide hints and preferences for setting up connections */
     map<string, string> tags = 3;
+
+    /* Axon framework version used by the client application instance*/
+    string version = 4;
 }
 
 /* Message containing information about the status of a Tracking Event Processor */

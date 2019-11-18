@@ -32,7 +32,13 @@ message CommandProviderOutbound {
 
         /* Sends a result of Command processing */
         CommandResponse command_response = 4;
+
+        /* Acknowledgement of previously sent instruction via inbound stream */
+        InstructionAck ack = 5;
     }
+
+    /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via inbound stream */
+    string instruction_id = 6;
 }
 
 /* An instruction or confirmation from AxonServer towards the component that provides the Command Handler */
@@ -40,12 +46,15 @@ message CommandProviderInbound {
     /* The instruction from AxonServer for this component */
     oneof request {
 
-        /* An acknowledgement of an instruction sent via the Outbound channel */
-        Confirmation confirmation = 1;
+        /* Acknowledgement of previously sent instruction via outbound stream */
+        InstructionAck ack = 1;
 
         /* A command for this component to process */
         Command command = 2;
     }
+
+    /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
+    string instruction_id = 3;
 }
 
 /* A message representing a Command that needs to be routed to a component capable of handling it */
