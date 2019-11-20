@@ -124,4 +124,9 @@ message CommandSubscription {
 
     /* The unique identifier of the component instance subscribing */
     string client_id = 4;
+
+    /* A number that represents the client's relative load capacity compared to other clients.
+       This information is interpreted by Axon Server in relation to the other connected nodes' values.
+       Used to balance the dispatching of commands. If set to 0, Axon Server consider 100 as default value.*/
+    int32 load_factor = 5;
 }
