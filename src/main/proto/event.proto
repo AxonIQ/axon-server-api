@@ -100,7 +100,7 @@ message QueryEventsRequest {
      * If Axon Server SE is used, this property has no effect.
      * </p>
      */
-    bool use_local_store = 4;
+    bool allow_reading_from_follower = 4;
 }
 
 /* A message describing a response to a Query request */
@@ -222,7 +222,7 @@ message GetEventsRequest {
      * If Axon Server SE is used, this property has no effect.
      * </p>
      */
-    bool use_local_store = 7;
+    bool allow_reading_from_follower = 7;
 }
 
 /* Message containing the information of an Event */
