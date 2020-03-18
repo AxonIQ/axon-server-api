@@ -48,6 +48,34 @@ service EventStore {
     }
 }
 
+service EventScheduler {
+    rpc ScheduleEvent (ScheduleEventRequest) returns (ScheduleToken) {
+    }
+    rpc RescheduleEvent (RescheduleEventRequest) returns (InstructionAck) {
+    }
+    rpc CancelScheduledeEvent (CancelScheduledeEventRequest) returns (InstructionAck) {
+    }
+}
+
+message ScheduleEventRequest {
+    int64 instant = 1;
+    SerializedObject event = 2;
+
+}
+
+message RescheduleEventRequest {
+    string token = 1;
+    int64 instant = 2;
+}
+
+message CancelScheduledeEventRequest {
+    string token = 1;
+}
+
+message ScheduleToken {
+    string token = 1;
+}
+
 /* Request message to receive the first Token (Tail Token) of the Event Stream */
 message GetFirstTokenRequest {
 }
