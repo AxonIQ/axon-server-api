@@ -59,7 +59,7 @@ service EventScheduler {
 
 message ScheduleEventRequest {
     int64 instant = 1;
-    SerializedObject event = 2;
+    Event event = 2;
 
 }
 
