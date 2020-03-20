@@ -53,7 +53,7 @@ service EventScheduler {
     }
     rpc RescheduleEvent (RescheduleEventRequest) returns (InstructionAck) {
     }
-    rpc CancelScheduledeEvent (CancelScheduledeEventRequest) returns (InstructionAck) {
+    rpc CancelScheduledEvent (CancelScheduledeEventRequest) returns (InstructionAck) {
     }
 }
 
