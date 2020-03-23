@@ -108,3 +108,17 @@ message InstructionAck {
     /* Set if instruction acknowledgement failed. */
     ErrorMessage error = 3;
 }
+
+enum TaskStatus {
+    // Task is scheduled for execution
+    SCHEDULED = 0;
+    // Task execution completed successfully
+    COMPLETED = 1;
+    // Task execution failed with non transient exception
+    FAILED = 2;
+    // Task execution is in progress
+    RUNNING = 3;
+    // Task execution is in progress
+    CANCELLED = 4;
+
+}
