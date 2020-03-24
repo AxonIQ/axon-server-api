@@ -48,30 +48,44 @@ service EventStore {
     }
 }
 
+/* Service to use AxonServer as a provider of an EventScheduler */
 service EventScheduler {
+    //  Schedule the given event for publication at the given time}. The returned ScheduleToken can be used to cancel the planned publication.
     rpc ScheduleEvent (ScheduleEventRequest) returns (ScheduleToken) {
     }
-    rpc RescheduleEvent (RescheduleEventRequest) returns (InstructionAck) {
+    //  SCancel a scheduled event and schedule another in its place.
+    rpc RescheduleEvent (RescheduleEventRequest) returns (ScheduleToken) {
     }
-    rpc CancelScheduledEvent (CancelScheduledeEventRequest) returns (InstructionAck) {
+    //   Cancel the publication of a scheduled event. If the events has already been published, this method does nothing.
+    rpc CancelScheduledEvent (CancelScheduledEventRequest) returns (InstructionAck) {
     }
 }
 
+/* Request message to schedule an event */
 message ScheduleEventRequest {
+    /* timestamp when to publish the event */
     int64 instant = 1;
+    /* the event to publish */
     Event event = 2;
-
 }
 
+/* Request message to reschedule an event */
 message RescheduleEventRequest {
+    /* optional token of scheduled event to cancel */
     string token = 1;
+    /* timestamp when to publish the event */
     int64 instant = 2;
+    /* the event to publish */
+    Event event = 3;
 }
 
-message CancelScheduledeEventRequest {
+/* Request message to cancel an event */
+message CancelScheduledEventRequest {
+    /* token of scheduled event to cancel */
     string token = 1;
 }
 
+/* Token to manage a scheduled event */
 message ScheduleToken {
     string token = 1;
 }
