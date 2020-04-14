@@ -172,6 +172,9 @@ message GetAggregateEventsRequest {
 
     /* Whether a snapshot may be returned as first element in the stream */
     bool allow_snapshots = 3;
+
+    /* The maximum sequence number (inclusive) of the events to retrieve, 0 means up to last event */
+    int64 max_sequence = 4;
 }
 
 /* Request message to retrieve Snapshot Events for a specific Aggregate instance */
