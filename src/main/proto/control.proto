@@ -40,6 +40,9 @@ message PlatformInboundInstruction {
 
         /* Acknowledgement of previously sent instruction via outbound stream */
         InstructionAck ack = 4;
+
+        /* The result of the execution of an instruction */
+        InstructionResult result = 6;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */

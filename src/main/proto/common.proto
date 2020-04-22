@@ -109,6 +109,19 @@ message InstructionAck {
     ErrorMessage error = 3;
 }
 
+/* Message describing the result of the execution of an instruction*/
+message InstructionResult {
+
+    /* The identifier of the instruction */
+    string instruction_id = 1;
+
+    /* Indicator whether the instruction was processed successfully */
+    bool success = 2;
+
+    /* Cause of instruction handling failure. */
+    ErrorMessage error = 3;
+}
+
 enum TaskStatus {
     // Task is scheduled for execution
     SCHEDULED = 0;

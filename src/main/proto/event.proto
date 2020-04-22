@@ -22,7 +22,9 @@ service EventStore {
     rpc ListAggregateSnapshots (GetAggregateSnapshotsRequest) returns (stream Event) {
     }
 
-    // Retrieves the Events from a given tracking token. Results are streamed rather than returned at once.
+    /* Retrieves the Events from a given tracking token. However, if several GetEventsRequests are sent in the stream
+     only first one will create the tracker, others are used for increasing number of permits or blacklisting. Results
+     are streamed rather than returned at once. */
     rpc ListEvents (stream GetEventsRequest) returns (stream EventWithToken) {
     }
 
