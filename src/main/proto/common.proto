@@ -122,6 +122,7 @@ message InstructionResult {
     ErrorMessage error = 3;
 }
 
+/* Defines status values for a scheduled task */
 enum TaskStatus {
     // Task is scheduled for execution
     SCHEDULED = 0;

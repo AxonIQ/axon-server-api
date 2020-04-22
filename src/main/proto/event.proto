@@ -55,10 +55,10 @@ service EventScheduler {
     //  Schedule the given event for publication at the given time}. The returned ScheduleToken can be used to cancel the planned publication.
     rpc ScheduleEvent (ScheduleEventRequest) returns (ScheduleToken) {
     }
-    //  SCancel a scheduled event and schedule another in its place.
+    //  Cancel a scheduled event and schedule another in its place.
     rpc RescheduleEvent (RescheduleEventRequest) returns (ScheduleToken) {
     }
-    //   Cancel the publication of a scheduled event. If the events has already been published, this method does nothing.
+    //  Cancel the publication of a scheduled event. If the events has already been published, this method does nothing.
     rpc CancelScheduledEvent (CancelScheduledEventRequest) returns (InstructionAck) {
     }
 }
@@ -89,6 +89,7 @@ message CancelScheduledEventRequest {
 
 /* Token to manage a scheduled event */
 message ScheduleToken {
+    /* Field defining the token identifier */
     string token = 1;
 }
 
