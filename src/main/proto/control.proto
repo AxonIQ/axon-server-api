@@ -192,6 +192,9 @@ message EventProcessorInfo {
        Will report 0 if all threads are assigned a Segment.
      */
     int32 available_threads = 7;
+
+    /* The Token Store Identifier if available. This is only provided by Tracking Event Processors.*/
+    string token_store_identifier = 8;
 }
 
 /* Message providing reference to an Event Processor */
