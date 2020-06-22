@@ -172,6 +172,12 @@ message QueryUpdate {
 
     /* The Component Name of the Client providing the Update */
     string component_name = 6;
+
+    /* An Error Code identifying the type of error, if any */
+    string error_code = 7;
+
+    /* A detailed description of the error, if any */
+    ErrorMessage error_message = 8;
 }
 
 /* Message indicating that all relevant Updates have been sent for a Subscription Query, and that no further Updates are available */
