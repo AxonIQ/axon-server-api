@@ -87,6 +87,10 @@ message PlatformOutboundInstruction {
 
         /* Acknowledgement of previously sent instruction via inbound stream */
         InstructionAck ack = 11;
+
+        /* Instruction from AxonServer to Reset Tokens for a Tracking Event Processor to their initial state.
+         This will cause a replay. */
+        EventProcessorReference reset_tokens = 13;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via inbound stream */
