@@ -203,6 +203,12 @@ message GetEventsRequest {
        time-outs and stale tokens on clients.
      */
     repeated PayloadDescription blacklist = 6;
+
+    /**
+    * Instructs the server to send heartbeat messages at the given interval (in milliseconds) when no events are
+    * available for publication. A value of "0" means no heartbeat messages to send.
+    */
+    uint32 heartbeatInterval = 8;
 }
 
 /* Message containing the information of an Event */
