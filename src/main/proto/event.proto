@@ -145,6 +145,8 @@ message QueryEventsRequest {
      */
     bool force_read_from_leader = 4;
 
+    /* If true, snapshots will be queried instead of events */
+    bool query_snapshots = 5;
 }
 
 /* A message describing a response to a Query request */
