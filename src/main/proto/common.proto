@@ -82,6 +82,9 @@ message ErrorMessage {
 
     /* An Error Code identifying the type of error */
     string error_code = 4;
+
+    /* Indicator whether the error is persistent. Persistent errors imply that the same error will consistently be returned if the same input is supplied */
+    bool persistent = 5;
 }
 
 /* Message used for Flow Control instruction, providing the counterpart with additional permits for sending messages */
