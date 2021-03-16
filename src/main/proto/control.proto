@@ -30,8 +30,8 @@ message PlatformInboundInstruction {
          */
         ClientIdentification register = 1;
 
-        /* Information about Tracking Processors defined in the application.
-           This information is used by AxonServer to monitor the progress of Tracking Processors across instances.
+        /* Information about Processors defined in the application.
+           This information is used by Axon Server to monitor the progress of Event Processors across instances.
          */
         EventProcessorInfo event_processor_info = 2;
 
@@ -64,22 +64,22 @@ message PlatformOutboundInstruction {
          */
         RequestReconnect request_reconnect = 3;
 
-        /* Instruction from AxonServer to Pause a Tracking Event Processor. */
+        /* Instruction from AxonServer to Pause a Streaming Event Processor. */
         EventProcessorReference pause_event_processor = 4;
 
-        /* Instruction from AxonServer to Start a Tracking Event Processor. */
+        /* Instruction from AxonServer to Start a Streaming Event Processor. */
         EventProcessorReference start_event_processor = 5;
 
-        /* Instruction from AxonServer to Release a specific segment in a Tracking Event Processor */
+        /* Instruction from AxonServer to Release a specific segment in a Streaming Event Processor */
         EventProcessorSegmentReference release_segment = 6;
 
-        /* A request from AxonServer for status information of a specific Tracking Event Processor */
+        /* A request from AxonServer for status information of a specific Streaming Event Processor */
         EventProcessorReference request_event_processor_info = 7;
 
-        /* Instruction to split a Segment in a Tracking Event Processor */
+        /* Instruction to split a Segment in a Streaming Event Processor */
         EventProcessorSegmentReference split_event_processor_segment = 8;
 
-        /* Instruction to merge two Segments in a Tracking Event Processor */
+        /* Instruction to merge two Segments in a Streaming Event Processor */
         EventProcessorSegmentReference merge_event_processor_segment = 9;
 
         /* This heartbeat is used by AxonFramework in order to check if the connection is still alive*/
@@ -144,10 +144,10 @@ message ClientIdentification {
     string version = 4;
 }
 
-/* Message containing information about the status of a Tracking Event Processor */
+/* Message containing information about the status of an Event Processor */
 message EventProcessorInfo {
 
-    /* Message containing information about the status of a Segment of a Tracking Event Processor */
+    /* Message containing information about the status of a Segment of a Streaming Event Processor */
     message SegmentStatus {
         /* The ID of the Segment for which the status is reported */
         int32 segment_id = 1;
@@ -183,7 +183,7 @@ message EventProcessorInfo {
     /* Flag indicating whether the processor, when stopped, did so because of an irrecoverable Error */
     bool error = 5;
 
-    /* Status details of each of the Segments for which Events are being processed. This is only provided by Tracking
+    /* Status details of each of the Segments for which Events are being processed. This is only provided by Streaming
        Event Processors.
      */
     repeated SegmentStatus segment_status = 6;
@@ -193,8 +193,13 @@ message EventProcessorInfo {
      */
     int32 available_threads = 7;
 
-    /* The Token Store Identifier if available. This is only provided by Tracking Event Processors.*/
+    /* The Token Store Identifier if available. This is only provided by Streaming Event Processors.*/
     string token_store_identifier = 8;
+
+    /* Flag indicating whether the processor is a Streaming Event Processor.
+       This dictates whether streaming operations, like split and merge, are supported by this processor.
+     */
+    bool is_streaming_processor = 9;
 }
 
 /* Message providing reference to an Event Processor */
