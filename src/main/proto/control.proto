@@ -43,6 +43,12 @@ message PlatformInboundInstruction {
 
         /* The result of the execution of an instruction */
         InstructionResult result = 6;
+
+        EventProcessorIdentifier pause_event_processor = 7;
+
+        EventProcessorIdentifier start_event_processor = 8;
+
+        EventProcessorRelease release_event_processor = 9;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
@@ -220,4 +226,22 @@ message EventProcessorSegmentReference {
 }
 
 message Heartbeat {
+}
+
+message EventProcessorIdentifier {
+
+    string context = 1;
+
+    string processor_name = 2;
+
+    string token_store_identifier = 3;
+
+}
+
+message EventProcessorRelease {
+
+    EventProcessorIdentifier event_processor = 1;
+
+    /* Release Duration in seconds */
+    int32 release_duration = 2;
 }
