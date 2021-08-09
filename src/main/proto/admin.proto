@@ -1,0 +1,32 @@
+syntax = "proto3";
+package io.axoniq.axonserver.grpc.admin;
+import "google/protobuf/empty.proto";
+option java_multiple_files = true;
+
+service EventProcessorAdminService {
+
+  rpc PauseEventProcessor(EventProcessorIdentifier) returns (google.protobuf.Empty);
+  rpc EventProcessorsPerContext(ContextId) returns (stream EventProcessor);
+
+}
+
+message EventProcessorIdentifier {
+  string context = 1;
+  string processor_name = 2;
+  string token_store_identifier = 3;
+}
+
+message ContextId {
+  string name = 1;
+}
+
+message EventProcessor {
+  EventProcessorIdentifier event_processor_identifier = 1;
+  repeated ClaimedSegment claimed_segments = 2;
+}
+
+message ClaimedSegment {
+  int32 segment_id = 1;
+  string client_id = 2;
+  int32 part_of = 3;
+}
