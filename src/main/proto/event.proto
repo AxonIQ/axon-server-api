@@ -1,6 +1,7 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.event;
 import "common.proto";
+import "google/protobuf/empty.proto";
 option java_multiple_files = true;
 
 /* Service providing operations against the EventStore functionality of Axon Server */
@@ -62,6 +63,52 @@ service EventScheduler {
     rpc CancelScheduledEvent (CancelScheduledEventRequest) returns (InstructionAck) {
     }
 }
+
+service EventTransformationService {
+
+    rpc StartTransformation(google.protobuf.Empty) returns (TransformationId) {
+    }
+
+    rpc TransformEvents(stream TransformEventsRequest) returns (Confirmation) {
+    }
+
+    rpc CancelTransformation(TransformationId) returns (Confirmation) {
+    }
+
+    rpc ApplyTransformation(TransformationId) returns (Confirmation) {
+    }
+
+}
+
+message TransformEventsRequest {
+    TransformationId transformation_id = 1;
+    oneof request {
+        TransformedEvent event = 2;
+        DeletedEvent delete_event = 3;
+    }
+}
+
+message TransformedEvent {
+    int64 token = 1;
+    Event event = 2;
+    int64 previous_token = 3;
+}
+
+message DeletedEvent {
+    int64 token = 1;
+    int64 previous_token = 2;
+    StorageType type = 3;
+}
+
+enum StorageType {
+    EventType = 0;
+    SnapshotType = 1;
+}
+
+message TransformationId {
+    string id = 1;
+}
+
 
 /* Request message to schedule an event */
 message ScheduleEventRequest {
