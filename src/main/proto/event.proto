@@ -75,9 +75,15 @@ service EventTransformationService {
     rpc CancelTransformation(TransformationId) returns (Confirmation) {
     }
 
-    rpc ApplyTransformation(TransformationId) returns (Confirmation) {
+    rpc ApplyTransformation(ApplyTransformationRequest) returns (Confirmation) {
     }
 
+}
+
+message ApplyTransformationRequest {
+    TransformationId transformation_id = 1;
+    int64 last_event_token = 2;
+    int64 last_snapshot_token = 3;
 }
 
 message TransformEventsRequest {
