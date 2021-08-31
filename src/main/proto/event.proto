@@ -78,12 +78,18 @@ service EventTransformationService {
     rpc ApplyTransformation(ApplyTransformationRequest) returns (Confirmation) {
     }
 
+    rpc RollbackTransformation(TransformationId) returns (Confirmation) {
+    }
+
+    rpc DeleteOldVersions(TransformationId) returns (Confirmation) {
+    }
+
 }
 
 message ApplyTransformationRequest {
     TransformationId transformation_id = 1;
     int64 last_event_token = 2;
-    int64 last_snapshot_token = 3;
+    bool keep_old_versions = 3;
 }
 
 message TransformEventsRequest {
@@ -103,12 +109,6 @@ message TransformedEvent {
 message DeletedEvent {
     int64 token = 1;
     int64 previous_token = 2;
-    StorageType type = 3;
-}
-
-enum StorageType {
-    EventType = 0;
-    SnapshotType = 1;
 }
 
 message TransformationId {
