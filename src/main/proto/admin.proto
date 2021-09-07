@@ -6,18 +6,13 @@ option java_multiple_files = true;
 service EventProcessorAdminService {
 
   rpc PauseEventProcessor(EventProcessorIdentifier) returns (google.protobuf.Empty);
-  rpc EventProcessorsPerContext(ContextId) returns (stream EventProcessor);
+  rpc EventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
 
 }
 
 message EventProcessorIdentifier {
-  string context = 1;
-  string processor_name = 2;
-  string token_store_identifier = 3;
-}
-
-message ContextId {
-  string name = 1;
+  string processor_name = 1;
+  string token_store_identifier = 2;
 }
 
 message EventProcessor {
