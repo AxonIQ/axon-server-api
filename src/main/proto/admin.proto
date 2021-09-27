@@ -1,0 +1,128 @@
+syntax = "proto3";
+package io.axoniq.axonserver.grpc.admin;
+import "google/protobuf/empty.proto";
+option java_multiple_files = true;
+
+//************************ ContextAdminService *****************************
+
+service ContextAdminService {
+
+  rpc CreateContext(CreateContextRequest) returns (google.protobuf.Empty) ;
+
+  rpc DeleteContext(DeleteContextRequest) returns (google.protobuf.Empty) ;
+
+  rpc GetContext(ContextId) returns (ContextOverview) ;
+
+  rpc GetContexts(google.protobuf.Empty) returns (stream ContextOverview) ;
+
+  rpc SubscribeContextUpdates(google.protobuf.Empty) returns (stream ContextUpdate) ;
+
+}
+
+service ReplicationGroupAdminService {
+
+  rpc CreateReplicationGroup(ReplicationGroup) returns (google.protobuf.Empty);
+
+  rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroup);
+
+  rpc GetReplicationGroup(ReplicationGroupId) returns (ReplicationGroup);
+
+  rpc DeleteReplicationGroup(DeleteReplicationGroupRequest) returns (google.protobuf.Empty) ;
+
+  rpc AddNodeToReplicationGroup(JoinReplicationGroup) returns (google.protobuf.Empty) ;
+
+  rpc RemoveNodeFromReplicationGroup(LeaveReplicationGroup) returns (google.protobuf.Empty) ;
+
+}
+
+message CreateContextRequest {
+  string name = 1;
+  string replicationGroupName = 2;
+  map<string, string> meta_data = 3;
+}
+
+message DeleteContextRequest {
+  string name = 1;
+  bool preserveEventStore = 2;
+}
+
+message ContextId {
+  string name = 1;
+}
+
+message ContextOverview {
+  string name = 1;
+  ReplicationGroup replicationGroup = 2;
+  map<string, string> meta_data = 3;
+  int64 pendingSince = 4;
+  bool changePending = 5;
+}
+
+message ContextUpdate {
+  string context = 1;
+  ContextUpdateType type = 2;
+}
+
+enum ContextUpdateType {
+
+  /* new context has been created. */
+  CREATED = 0;
+
+  /* context has been requested to be removed */
+  PRE_DELETED = 1;
+
+  /* context has been removed */
+  DELETED = 2;
+
+}
+
+message ReplicationGroup {
+  string name = 1;
+  repeated ReplicationGroupMember members = 2;
+  int64 pendingSince = 3;
+  bool changePending = 4;
+  repeated string contexts = 5;
+}
+
+message DeleteReplicationGroupRequest {
+  string name = 1;
+  bool preserveEventStore = 2;
+}
+
+message ReplicationGroupMember {
+  string node_name = 1;
+  string host = 2;
+  int32 port = 3;
+  Role role = 4;
+  bool pendingDelete = 5;
+}
+
+enum Role {
+  ROLE_PRIMARY = 0;
+  ROLE_ACTIVE_BACKUP = 2;
+  ROLE_PASSIVE_BACKUP = 3;
+  ROLE_MESSAGING_ONLY = 4;
+  ROLE_SECONDARY = 5;
+}
+
+message ReplicationGroupId {
+  string name = 1;
+}
+
+message JoinReplicationGroup {
+  string replication_group_name = 1;
+  string node_name = 2;
+  Role role = 3;
+}
+
+message LeaveReplicationGroup {
+  string replication_group_name = 1;
+  string node_name = 2;
+  bool preserveEventStore = 3;
+}
+
+message ReplicationGroupContext {
+  string replication_group_name = 1;
+  string context_name = 2;
+  map<string, string> meta_data = 3;
+}
