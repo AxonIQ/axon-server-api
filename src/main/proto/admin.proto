@@ -11,7 +11,7 @@ service ContextAdminService {
 
   rpc DeleteContext(DeleteContextRequest) returns (google.protobuf.Empty) ;
 
-  rpc GetContext(ContextId) returns (ContextOverview) ;
+  rpc GetContext(GetContextRequest) returns (ContextOverview) ;
 
   rpc GetContexts(google.protobuf.Empty) returns (stream ContextOverview) ;
 
@@ -21,11 +21,11 @@ service ContextAdminService {
 
 service ReplicationGroupAdminService {
 
-  rpc CreateReplicationGroup(ReplicationGroup) returns (google.protobuf.Empty);
+  rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (google.protobuf.Empty);
 
-  rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroup);
+  rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroupOverview);
 
-  rpc GetReplicationGroup(ReplicationGroupId) returns (ReplicationGroup);
+  rpc GetReplicationGroup(GetReplicationGroupRequest) returns (ReplicationGroupOverview);
 
   rpc DeleteReplicationGroup(DeleteReplicationGroupRequest) returns (google.protobuf.Empty) ;
 
@@ -46,13 +46,13 @@ message DeleteContextRequest {
   bool preserveEventStore = 2;
 }
 
-message ContextId {
+message GetContextRequest {
   string name = 1;
 }
 
 message ContextOverview {
   string name = 1;
-  ReplicationGroup replicationGroup = 2;
+  ReplicationGroupOverview replicationGroup = 2;
   map<string, string> meta_data = 3;
   int64 pendingSince = 4;
   bool changePending = 5;
@@ -76,7 +76,14 @@ enum ContextUpdateType {
 
 }
 
-message ReplicationGroup {
+message CreateReplicationGroupRequest {
+  string name = 1;
+  repeated ReplicationGroupMember members = 2;
+  int64 pendingSince = 3;
+  bool changePending = 4;
+}
+
+message ReplicationGroupOverview {
   string name = 1;
   repeated ReplicationGroupMember members = 2;
   int64 pendingSince = 3;
@@ -105,7 +112,7 @@ enum Role {
   ROLE_SECONDARY = 5;
 }
 
-message ReplicationGroupId {
+message GetReplicationGroupRequest {
   string name = 1;
 }
 
