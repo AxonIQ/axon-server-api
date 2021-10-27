@@ -174,3 +174,13 @@ message ApplicationOverview {
   repeated ApplicationContextRole rolesPerContext = 3;
   map<string, string> meta_data = 4;
 }
+
+//***************************** Event Processor Admin Service ***************************
+
+service EventProcessorAdminService {
+  rpc PauseEventProcessor(EventProcessorIdentifier) returns (google.protobuf.Empty);
+}
+message EventProcessorIdentifier {
+  string processor_name = 1;
+  string token_store_identifier = 2;
+}
