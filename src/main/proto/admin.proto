@@ -183,9 +183,16 @@ service EventProcessorAdminService {
   rpc StartEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
   rpc SplitEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
   rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
 }
 
 message EventProcessorIdentifier {
   string processor_name = 1;
   string token_store_identifier = 2;
+}
+
+message MoveSegment {
+  EventProcessorIdentifier event_processor = 1;
+  int32 segment = 2;
+  string target_client_id = 3;
 }
