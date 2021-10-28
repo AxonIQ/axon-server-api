@@ -179,6 +179,7 @@ message ApplicationOverview {
 
 service EventProcessorAdminService {
   rpc PauseEventProcessor(EventProcessorIdentifier) returns (google.protobuf.Empty);
+  rpc StartEventProcessor(EventProcessorIdentifier) returns (google.protobuf.Empty);
 }
 message EventProcessorIdentifier {
   string processor_name = 1;
