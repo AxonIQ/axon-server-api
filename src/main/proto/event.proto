@@ -66,7 +66,7 @@ service EventScheduler {
 
 service EventTransformationService {
 
-    rpc StartTransformation(google.protobuf.Empty) returns (TransformationId) {
+    rpc StartTransformation(StartTransformationRequest) returns (TransformationId) {
     }
 
     rpc TransformEvents(stream TransformEventsRequest) returns (Confirmation) {
@@ -84,6 +84,10 @@ service EventTransformationService {
     rpc DeleteOldVersions(TransformationId) returns (Confirmation) {
     }
 
+}
+
+message StartTransformationRequest {
+    string description = 1;
 }
 
 message ApplyTransformationRequest {
