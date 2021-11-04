@@ -64,57 +64,82 @@ service EventScheduler {
     }
 }
 
+/* Service to transform events in an event store */
 service EventTransformationService {
 
+    // Start a new transformation.
     rpc StartTransformation(StartTransformationRequest) returns (TransformationId) {
     }
 
+    // Add updated events to a transformation.
     rpc TransformEvents(stream TransformEventsRequest) returns (Confirmation) {
     }
 
+    // Cancel a transformation before it is applied.
     rpc CancelTransformation(TransformationId) returns (Confirmation) {
     }
 
+    // Apply the changes from a transformation in the event store.
     rpc ApplyTransformation(ApplyTransformationRequest) returns (Confirmation) {
     }
 
+    // Rollback changes made by the last transformation
     rpc RollbackTransformation(TransformationId) returns (Confirmation) {
     }
 
+    // Delete old versions of events updated by a transformation
     rpc DeleteOldVersions(TransformationId) returns (Confirmation) {
     }
 
 }
 
+/* Request to start a transformation */
 message StartTransformationRequest {
+    /* a description of the purpose of this transformation, for reference only */
     string description = 1;
 }
 
+/* Request to apply a transformation */
 message ApplyTransformationRequest {
+    /* the identification of the transformation */
     TransformationId transformation_id = 1;
+    /* the token of the last updated event in this transformation */
     int64 last_event_token = 2;
+    /* flag to indicate that Axon Server should preserve old versions of the updated events */
     bool keep_old_versions = 3;
 }
 
+/* Message containing one event to transform within a transformation */
 message TransformEventsRequest {
+    /* the identification of the transformation */
     TransformationId transformation_id = 1;
     oneof request {
+        /* Replaces the content of an event with the new content */
         TransformedEvent event = 2;
+        /* Deletes the content of an event */
         DeletedEvent delete_event = 3;
     }
 }
 
+/* Replaces the content of an event with the new content */
 message TransformedEvent {
+    /* the global index of the event to replace */
     int64 token = 1;
+    /* the new content of the event */
     Event event = 2;
+    /* The token of the previous event in the transformation */
     int64 previous_token = 3;
 }
 
+/* Deletes the content of an event */
 message DeletedEvent {
+    /* the global index of the event to clear */
     int64 token = 1;
+    /* The token of the previous event in the transformation */
     int64 previous_token = 2;
 }
 
+/* Uniquely identifies a transformation */
 message TransformationId {
     string id = 1;
 }
