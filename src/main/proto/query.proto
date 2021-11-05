@@ -68,6 +68,9 @@ message QueryProviderInbound {
 
         /* Indicator that receiver is no more interested in updates of this query */
         QueryComplete query_complete = 5;
+
+        /* Indicator that receiver should send more updates of this query */
+        QueryFlowControl query_flow_control = 6;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
@@ -82,6 +85,18 @@ message QueryComplete {
 
     /* The identifier of the incoming query to complete */
     string request_id = 2;
+}
+
+/* todo */
+message QueryFlowControl {
+
+    /* A unique identifier for this message */
+    string message_id = 1;
+
+    /* The identifier of the incoming query to complete */
+    string request_id = 2;
+
+    int64 permits = 3;
 }
 
 /* Message representing an incoming Query */
