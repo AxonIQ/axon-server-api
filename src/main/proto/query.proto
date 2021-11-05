@@ -87,7 +87,7 @@ message QueryComplete {
     string request_id = 2;
 }
 
-/* todo */
+/* Message indicating that consumer is requesting more messages from producer. */
 message QueryFlowControl {
 
     /* A unique identifier for this message */
@@ -96,6 +96,7 @@ message QueryFlowControl {
     /* The identifier of the incoming query to complete */
     string request_id = 2;
 
+    /* Number of messages requested */
     int64 permits = 3;
 }
 
