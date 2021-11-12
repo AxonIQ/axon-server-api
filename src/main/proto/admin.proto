@@ -174,3 +174,25 @@ message ApplicationOverview {
   repeated ApplicationContextRole rolesPerContext = 3;
   map<string, string> meta_data = 4;
 }
+
+//***************************** Event Processor Admin Service ***************************
+
+service EventProcessorAdminService {
+  /*The following api return a stream of Empty to allow the server to complete the stream without any result.*/
+  rpc PauseEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc StartEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc SplitEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
+}
+
+message EventProcessorIdentifier {
+  string processor_name = 1;
+  string token_store_identifier = 2;
+}
+
+message MoveSegment {
+  EventProcessorIdentifier event_processor = 1;
+  int32 segment = 2;
+  string target_client_id = 3;
+}
