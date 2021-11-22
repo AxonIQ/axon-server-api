@@ -175,6 +175,42 @@ message ApplicationOverview {
   map<string, string> meta_data = 4;
 }
 
+//************************ UserAdminService *****************************
+service UserAdminService {
+
+  rpc CreateOrUpdateUser(CreateOrUpdateUserRequest) returns (stream google.protobuf.Empty);
+
+  rpc DeleteUser(DeleteUserRequest) returns (stream google.protobuf.Empty);
+
+  rpc GetUsers(google.protobuf.Empty) returns (stream UserOverview);
+
+}
+
+message CreateOrUpdateUserRequest {
+  string userName = 1;
+  string password = 2;
+  repeated UserRoleRequest userRoles = 3;
+}
+
+message DeleteUserRequest {
+  string userName = 1;
+}
+
+message UserRoleRequest {
+  string role = 1;
+  string context = 2;
+}
+
+message UserRoleOverview {
+  string role = 1;
+  string context = 2;
+}
+
+message UserOverview {
+  string userName = 1;
+  bool enabled = 2;
+  repeated UserRoleOverview userRoles = 3;
+}
 //***************************** Event Processor Admin Service ***************************
 
 service EventProcessorAdminService {
