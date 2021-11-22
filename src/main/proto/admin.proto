@@ -178,9 +178,9 @@ message ApplicationOverview {
 //************************ UserAdminService *****************************
 service UserAdminService {
 
-  rpc CreateOrUpdateUser(CreateOrUpdateUserRequest) returns (google.protobuf.Empty);
+  rpc CreateOrUpdateUser(CreateOrUpdateUserRequest) returns (stream google.protobuf.Empty);
 
-  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty);
+  rpc DeleteUser(DeleteUserRequest) returns (stream google.protobuf.Empty);
 
   rpc GetUsers(google.protobuf.Empty) returns (stream UserOverview);
 
