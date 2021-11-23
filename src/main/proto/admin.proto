@@ -7,9 +7,9 @@ option java_multiple_files = true;
 
 service ContextAdminService {
 
-  rpc CreateContext(CreateContextRequest) returns (google.protobuf.Empty) ;
+  rpc CreateContext(CreateContextRequest) returns (stream google.protobuf.Empty) ;
 
-  rpc DeleteContext(DeleteContextRequest) returns (google.protobuf.Empty) ;
+  rpc DeleteContext(DeleteContextRequest) returns (stream google.protobuf.Empty) ;
 
   rpc GetContext(GetContextRequest) returns (ContextOverview) ;
 
@@ -21,17 +21,17 @@ service ContextAdminService {
 
 service ReplicationGroupAdminService {
 
-  rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (google.protobuf.Empty);
+  rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (stream google.protobuf.Empty);
 
   rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroupOverview);
 
   rpc GetReplicationGroup(GetReplicationGroupRequest) returns (ReplicationGroupOverview);
 
-  rpc DeleteReplicationGroup(DeleteReplicationGroupRequest) returns (google.protobuf.Empty) ;
+  rpc DeleteReplicationGroup(DeleteReplicationGroupRequest) returns (stream google.protobuf.Empty) ;
 
-  rpc AddNodeToReplicationGroup(JoinReplicationGroup) returns (google.protobuf.Empty) ;
+  rpc AddNodeToReplicationGroup(JoinReplicationGroup) returns (stream google.protobuf.Empty) ;
 
-  rpc RemoveNodeFromReplicationGroup(LeaveReplicationGroup) returns (google.protobuf.Empty) ;
+  rpc RemoveNodeFromReplicationGroup(LeaveReplicationGroup) returns (stream google.protobuf.Empty) ;
 
 }
 
@@ -138,7 +138,7 @@ message ReplicationGroupContext {
 service  ApplicationAdminService {
   rpc CreateOrUpdateApplication(ApplicationRequest) returns (Token);
 
-  rpc DeleteApplication(ApplicationId) returns (google.protobuf.Empty);
+  rpc DeleteApplication(ApplicationId) returns (stream google.protobuf.Empty);
 
   rpc GetApplication(ApplicationId) returns (ApplicationOverview);
 
