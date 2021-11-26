@@ -68,11 +68,8 @@ enum ContextUpdateType {
   /* new context has been created. */
   CREATED = 0;
 
-  /* context has been requested to be removed */
-  PRE_DELETED = 1;
-
   /* context has been removed */
-  DELETED = 2;
+  DELETED = 1;
 
 }
 
