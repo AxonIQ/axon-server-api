@@ -7,9 +7,9 @@ option java_multiple_files = true;
 
 service ContextAdminService {
 
-  rpc CreateContext(CreateContextRequest) returns (google.protobuf.Empty) ;
+  rpc CreateContext(CreateContextRequest) returns (stream google.protobuf.Empty) ;
 
-  rpc DeleteContext(DeleteContextRequest) returns (google.protobuf.Empty) ;
+  rpc DeleteContext(DeleteContextRequest) returns (stream google.protobuf.Empty) ;
 
   rpc GetContext(GetContextRequest) returns (ContextOverview) ;
 
@@ -21,17 +21,17 @@ service ContextAdminService {
 
 service ReplicationGroupAdminService {
 
-  rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (google.protobuf.Empty);
+  rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (stream google.protobuf.Empty);
 
   rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroupOverview);
 
   rpc GetReplicationGroup(GetReplicationGroupRequest) returns (ReplicationGroupOverview);
 
-  rpc DeleteReplicationGroup(DeleteReplicationGroupRequest) returns (google.protobuf.Empty) ;
+  rpc DeleteReplicationGroup(DeleteReplicationGroupRequest) returns (stream google.protobuf.Empty) ;
 
-  rpc AddNodeToReplicationGroup(JoinReplicationGroup) returns (google.protobuf.Empty) ;
+  rpc AddNodeToReplicationGroup(JoinReplicationGroup) returns (stream google.protobuf.Empty) ;
 
-  rpc RemoveNodeFromReplicationGroup(LeaveReplicationGroup) returns (google.protobuf.Empty) ;
+  rpc RemoveNodeFromReplicationGroup(LeaveReplicationGroup) returns (stream google.protobuf.Empty) ;
 
 }
 
@@ -68,11 +68,8 @@ enum ContextUpdateType {
   /* new context has been created. */
   CREATED = 0;
 
-  /* context has been requested to be removed */
-  PRE_DELETED = 1;
-
   /* context has been removed */
-  DELETED = 2;
+  DELETED = 1;
 
 }
 
@@ -138,7 +135,7 @@ message ReplicationGroupContext {
 service  ApplicationAdminService {
   rpc CreateOrUpdateApplication(ApplicationRequest) returns (Token);
 
-  rpc DeleteApplication(ApplicationId) returns (google.protobuf.Empty);
+  rpc DeleteApplication(ApplicationId) returns (stream google.protobuf.Empty);
 
   rpc GetApplication(ApplicationId) returns (ApplicationOverview);
 
@@ -175,6 +172,42 @@ message ApplicationOverview {
   map<string, string> meta_data = 4;
 }
 
+//************************ UserAdminService *****************************
+service UserAdminService {
+
+  rpc CreateOrUpdateUser(CreateOrUpdateUserRequest) returns (stream google.protobuf.Empty);
+
+  rpc DeleteUser(DeleteUserRequest) returns (stream google.protobuf.Empty);
+
+  rpc GetUsers(google.protobuf.Empty) returns (stream UserOverview);
+
+}
+
+message CreateOrUpdateUserRequest {
+  string userName = 1;
+  string password = 2;
+  repeated UserRoleRequest userRoles = 3;
+}
+
+message DeleteUserRequest {
+  string userName = 1;
+}
+
+message UserRoleRequest {
+  string role = 1;
+  string context = 2;
+}
+
+message UserRoleOverview {
+  string role = 1;
+  string context = 2;
+}
+
+message UserOverview {
+  string userName = 1;
+  bool enabled = 2;
+  repeated UserRoleOverview userRoles = 3;
+}
 //***************************** Event Processor Admin Service ***************************
 
 service EventProcessorAdminService {
