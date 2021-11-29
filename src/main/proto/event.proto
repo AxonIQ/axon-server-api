@@ -135,8 +135,6 @@ message TransformedEvent {
 message DeletedEvent {
     /* the global index of the event to clear */
     int64 token = 1;
-    /* The token of the previous event in the transformation */
-    int64 previous_token = 2;
 }
 
 /* Uniquely identifies a transformation */
