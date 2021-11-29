@@ -72,7 +72,7 @@ service EventTransformationService {
     }
 
     // Add updated events to a transformation.
-    rpc TransformEvents(stream TransformEventsRequest) returns (Confirmation) {
+    rpc TransformEvents(stream TransformEventRequest) returns (Confirmation) {
     }
 
     // Cancel a transformation before it is applied.
@@ -110,14 +110,16 @@ message ApplyTransformationRequest {
 }
 
 /* Message containing one event to transform within a transformation */
-message TransformEventsRequest {
+message TransformEventRequest {
     /* the identification of the transformation */
     TransformationId transformation_id = 1;
+    /* The token of the previous event in the transformation */
+    int64 previous_token = 2;
     oneof request {
         /* Replaces the content of an event with the new content */
-        TransformedEvent event = 2;
+        TransformedEvent event = 3;
         /* Deletes the content of an event */
-        DeletedEvent delete_event = 3;
+        DeletedEvent delete_event = 4;
     }
 }
 
@@ -127,8 +129,6 @@ message TransformedEvent {
     int64 token = 1;
     /* the new content of the event */
     Event event = 2;
-    /* The token of the previous event in the transformation */
-    int64 previous_token = 3;
 }
 
 /* Deletes the content of an event */
