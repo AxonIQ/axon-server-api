@@ -1,6 +1,7 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.admin;
 import "google/protobuf/empty.proto";
+import "common.proto";
 option java_multiple_files = true;
 
 //************************ ContextAdminService *****************************
@@ -161,7 +162,7 @@ message ApplicationContextRole {
 }
 
 message Token {
- string token = 1;
+  string token = 1;
 }
 
 message ApplicationId {
@@ -220,6 +221,8 @@ service EventProcessorAdminService {
   rpc SplitEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
   rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
   rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
+  rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
+  rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
 }
 
 message EventProcessorIdentifier {
@@ -231,4 +234,29 @@ message MoveSegment {
   EventProcessorIdentifier event_processor = 1;
   int32 segment = 2;
   string target_client_id = 3;
+}
+
+message EventProcessor {
+  EventProcessorIdentifier identifier = 1;
+  string mode = 2;
+  bool isStreaming = 3;
+  repeated EventProcessorInstance client_instance = 4;
+}
+
+message EventProcessorInstance  {
+  string client_id = 1;
+  bool isRunning = 2;
+  int32 max_segments = 3;
+  repeated EventProcessorSegment claimed_segment = 4;
+}
+
+message EventProcessorSegment {
+  int32 id = 1;
+  int32 one_part_of = 2;
+  string claimed_by = 3;
+  bool is_caughtUp = 4;
+  bool is_replaying = 5;
+  int64 token_position = 6;
+  bool is_in_error = 7;
+  string error = 8;
 }
