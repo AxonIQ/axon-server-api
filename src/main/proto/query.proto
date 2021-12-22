@@ -159,6 +159,9 @@ message QueryResponse {
 
     /* Some numbers are reserved for internal use for additional properties between AxonServer nodes */
     reserved 15;
+
+    /* Indicates whether this response is being streamed */
+    bool streamed = 8;
 }
 
 /* Message that represents a Subscription Query */
