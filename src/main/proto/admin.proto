@@ -222,7 +222,7 @@ service EventProcessorAdminService {
   rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
   rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
-  rpc GetEventProcessorsByComponent(Application) returns (stream EventProcessor);
+  rpc GetEventProcessorsByApplication(Application) returns (stream EventProcessor);
 }
 
 message EventProcessorIdentifier {
