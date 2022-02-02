@@ -137,5 +137,8 @@ enum TaskStatus {
     RUNNING = 3;
     // Task execution is in progress
     CANCELLED = 4;
+}
 
+message Component {
+    string component = 1;
 }
