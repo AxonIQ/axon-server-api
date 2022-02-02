@@ -136,6 +136,6 @@ enum TaskStatus {
     CANCELLED = 4;
 }
 
-message Application {
-    string application = 1;
+message Component {
+    string component = 1;
 }
