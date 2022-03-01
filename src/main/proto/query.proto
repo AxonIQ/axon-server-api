@@ -67,7 +67,7 @@ message QueryProviderInbound {
         SubscriptionQueryRequest subscription_query_request = 3;
 
         /* Indicator that receiver is no more interested in updates of this query */
-        QueryComplete query_complete = 5;
+        QueryReference query_cancel = 5;
 
         /* Indicator that receiver should send more updates of this query */
         QueryFlowControl query_flow_control = 6;
@@ -75,6 +75,12 @@ message QueryProviderInbound {
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
     string instruction_id = 4;
+}
+
+message QueryReference {
+
+    /* The identifier of the query request. */
+    string request_id = 1;
 }
 
 /* Message indicating that query has been completed. */
@@ -90,14 +96,11 @@ message QueryComplete {
 /* Message indicating that consumer is requesting more messages from producer. */
 message QueryFlowControl {
 
-    /* A unique identifier for this message */
-    string message_id = 1;
-
     /* The identifier of the incoming query to complete */
-    string request_id = 2;
+    QueryReference query_reference = 1;
 
     /* Number of messages requested */
-    int64 permits = 3;
+    int64 permits = 2;
 }
 
 /* Message representing an incoming Query */
@@ -129,9 +132,6 @@ message QueryRequest {
 
     /* The Name of the Component dispatching the query */
     string component_name = 9;
-
-    /* Represents the expected type of response(s). */
-    string expected_response_type = 10;
 }
 
 /* Message that represents the Response to a Query */
@@ -159,9 +159,6 @@ message QueryResponse {
 
     /* Some numbers are reserved for internal use for additional properties between AxonServer nodes */
     reserved 15;
-
-    /* Indicates whether this response is being streamed */
-    bool streamed = 8;
 }
 
 /* Message that represents a Subscription Query */
