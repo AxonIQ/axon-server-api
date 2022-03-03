@@ -221,6 +221,7 @@ service EventProcessorAdminService {
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
   rpc LoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc GetBalancingStrategies(google.protobuf.Empty) returns (stream LoadBalancingStrategy);
 }
 
 message EventProcessorIdentifier {
@@ -261,10 +262,10 @@ message EventProcessorSegment {
 
 message LoadBalanceRequest {
   EventProcessorIdentifier processor = 1;
-  LoadBalanceStrategy strategy = 2;
+  string strategy = 2;
 }
 
-enum LoadBalanceStrategy {
-  DEFAULT = 0;
-  THREAD_NUMBER = 1;
+message LoadBalancingStrategy {
+  string strategy = 1;
+  string label = 2;
 }
