@@ -224,7 +224,7 @@ service EventProcessorAdminService {
   rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
   /* Request to move the specified segment of a streaming event processor to the desired destination */
   rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
-  /* Retrieves all event processor registered in AS cluster */
+  /* Retrieves all event processors registered in an Axon Server cluster */
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
   /* Retrieves all event processor registered in AS cluster for the specified component*/
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
