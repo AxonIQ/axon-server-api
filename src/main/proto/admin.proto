@@ -220,6 +220,9 @@ service EventProcessorAdminService {
   rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
+  rpc LoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc SetAutoLoadBalanceStrategy(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc GetBalancingStrategies(google.protobuf.Empty) returns (stream LoadBalancingStrategy);
 }
 
 message EventProcessorIdentifier {
@@ -256,4 +259,14 @@ message EventProcessorSegment {
   int64 token_position = 6;
   bool is_in_error = 7;
   string error = 8;
+}
+
+message LoadBalanceRequest {
+  EventProcessorIdentifier processor = 1;
+  string strategy = 2;
+}
+
+message LoadBalancingStrategy {
+  string strategy = 1;
+  string label = 2;
 }
