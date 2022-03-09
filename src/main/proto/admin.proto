@@ -221,7 +221,7 @@ service EventProcessorAdminService {
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
   rpc LoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
-  rpc AutoLoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc SetAutoLoadBalanceStrategy(LoadBalanceRequest) returns (stream google.protobuf.Empty);
   rpc GetBalancingStrategies(google.protobuf.Empty) returns (stream LoadBalancingStrategy);
 }
 
