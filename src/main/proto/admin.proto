@@ -22,6 +22,8 @@ service ContextAdminService {
 
 service ReplicationGroupAdminService {
 
+  rpc GetNodes (google.protobuf.Empty) returns (stream NodeOverview) {}
+
   rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (stream google.protobuf.Empty);
 
   rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroupOverview);
@@ -269,4 +271,26 @@ message LoadBalanceRequest {
 message LoadBalancingStrategy {
   string strategy = 1;
   string label = 2;
+}
+
+/* Message containing connection information for an AxonServer Node */
+message NodeOverview {
+
+  /* The host name to use when connecting to this node */
+  string host_name = 1;
+
+  /* The port number for gRPC connections */
+  int32 grpc_port = 2;
+
+  /* The port number for HTTP connections */
+  int32 http_port = 3;
+
+  /* The unique name of the node to connect with, for purpose of debugging */
+  string node_name = 4;
+
+  /* List of replication groups that belongs to this node */
+  repeated string replication_groups = 5;
+
+  /* List of tags associated with this node */
+  map<string,string> tags = 6;
 }
