@@ -88,7 +88,7 @@ service EventTransformationService {
     }
 
     // Delete old versions of events updated by a transformation
-    rpc DeleteOldVersions(TransformationId) returns (Confirmation) {
+    rpc DeleteOldVersions(google.protobuf.Empty) returns (Confirmation) {
     }
 
 }
