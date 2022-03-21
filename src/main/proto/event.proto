@@ -72,23 +72,23 @@ service EventTransformationService {
     }
 
     // Add updated events to a transformation.
-    rpc TransformEvents(stream TransformEventsRequest) returns (Confirmation) {
+    rpc TransformEvents(stream TransformEventsRequest) returns (EventTransformedAck) {
     }
 
     // Cancel a transformation before it is applied.
-    rpc CancelTransformation(TransformationId) returns (Confirmation) {
+    rpc CancelTransformation(TransformationId) returns (stream google.protobuf.Empty) {
     }
 
     // Apply the changes from a transformation in the event store.
-    rpc ApplyTransformation(ApplyTransformationRequest) returns (Confirmation) {
+    rpc ApplyTransformation(ApplyTransformationRequest) returns (stream google.protobuf.Empty) {
     }
 
     // Rollback changes made by the last transformation
-    rpc RollbackTransformation(TransformationId) returns (Confirmation) {
+    rpc RollbackTransformation(TransformationId) returns (stream google.protobuf.Empty) {
     }
 
     // Delete old versions of events updated by a transformation
-    rpc DeleteOldVersions(google.protobuf.Empty) returns (Confirmation) {
+    rpc DeleteOldVersions(google.protobuf.Empty) returns (stream google.protobuf.Empty) {
     }
 
 }
@@ -140,6 +140,11 @@ message DeletedEvent {
 /* Uniquely identifies a transformation */
 message TransformationId {
     string id = 1;
+}
+
+/* Acknowledgement that event with given token has been transformed successfully */
+message EventTransformedAck {
+    int64 token = 1;
 }
 
 
