@@ -67,12 +67,15 @@ service EventScheduler {
 /* Service to transform events in an event store */
 service EventTransformationService {
 
+    rpc Transformations(google.protobuf.Empty) returns (stream Transformation) {
+    }
+
     // Start a new transformation.
     rpc StartTransformation(StartTransformationRequest) returns (TransformationId) {
     }
 
     // Add updated events to a transformation.
-    rpc TransformEvents(stream TransformEventsRequest) returns (stream EventTransformedAck) {
+    rpc TransformEvents(stream TransformRequest) returns (stream TransformRequestAck) {
     }
 
     // Cancel a transformation before it is applied.
@@ -93,6 +96,24 @@ service EventTransformationService {
 
 }
 
+message Transformation {
+    TransformationId transformationId = 1;
+    TransformationState state = 2;
+    int64 sequence = 3;
+    ErrorMessage error = 4;
+}
+
+enum TransformationState {
+    ACTIVE = 0;
+    ROLLING_BACK = 1;
+    ROLLED_BACK = 2;
+    CANCELLING = 3;
+    CANCELLED = 4;
+    APPLYING = 5;
+    APPLIED = 6;
+    FATAL = 7;
+}
+
 /* Request to start a transformation */
 message StartTransformationRequest {
     /* a description of the purpose of this transformation, for reference only */
@@ -110,11 +131,11 @@ message ApplyTransformationRequest {
 }
 
 /* Message containing one event to transform within a transformation */
-message TransformEventsRequest {
+message TransformRequest {
     /* the identification of the transformation */
     TransformationId transformation_id = 1;
-    /* The token of the previous event in the transformation */
-    int64 previous_token = 2;
+    /* The sequence of the current transformation */
+    int64 sequence = 2;
     oneof request {
         /* Replaces the content of an event with the new content */
         TransformedEvent event = 3;
@@ -143,8 +164,10 @@ message TransformationId {
 }
 
 /* Acknowledgement that event with given token has been transformed successfully */
-message EventTransformedAck {
-    int64 token = 1;
+message TransformRequestAck {
+
+    /* The sequence of the transformation request */
+    int64 sequence = 1;
 }
 
 
