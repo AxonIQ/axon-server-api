@@ -215,19 +215,30 @@ service EventProcessorAdminService {
   /*The following api return a stream of Empty to allow the server to complete the stream without any result.*/
 
   /* Request to pause an event processor */
-  rpc PauseEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc PauseEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
   /* Request to start an event processor */
-  rpc StartEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc StartEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
   /* Request to split the largest segment of a streaming event processor */
-  rpc SplitEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc SplitEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
   /* Request to merge the smallest two segments of a streaming event processor */
-  rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  rpc MergeEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
   /* Request to move the specified segment of a streaming event processor to the desired destination */
-  rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
+  rpc MoveEventProcessorSegment(MoveSegment) returns (AdminActionResult);
   /* Retrieves all event processor registered in AS cluster */
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
   /* Retrieves all event processor registered in AS cluster for the specified component*/
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
+}
+
+message AdminActionResult {
+  Result result = 1;
+}
+
+enum Result {
+  /* The handler confirmed that the action was executed successfully */
+  SUCCESS = 0;
+  /* The handler has accepted the result, no result will be returned */
+  ACCEPTED = 1;
 }
 
 message EventProcessorIdentifier {
