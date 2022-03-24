@@ -121,7 +121,7 @@ message QueryRequest {
     /* Meta Data providing contextual information of the Query */
     map<string, MetaDataValue> meta_data = 5;
 
-    /* @Deprecated if favor of expected_response_type. An object describing the expectations of the Response Type */
+    /* An object describing the expectations of the Response Type */
     SerializedObject response_type = 6;
 
     /* Any instructions for components Routing or Handling the Query */

@@ -68,7 +68,7 @@ enum ProcessingKey {
     reserved 4, 5, 6;
 
     /* key indicating whether Axon Server supports streaming. */
-    AS_SUPPORTS_STREAMING = 7;
+    SERVER_SUPPORTS_STREAMING = 7;
 
     /* key indicating whether Client supports streaming. */
     CLIENT_SUPPORTS_STREAMING = 8;
