@@ -65,13 +65,25 @@ message QueryProviderInbound {
 
         /* Represents an incoming Subscription Query, for which this component is expected to provide a response and updates */
         SubscriptionQueryRequest subscription_query_request = 3;
+
+        /* Indicator that receiver is no more interested in updates of this query */
+        QueryReference query_cancel = 5;
+
+        /* Indicator that receiver should send more updates of this query */
+        QueryFlowControl query_flow_control = 6;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
     string instruction_id = 4;
 }
 
-/* Message indicating that all available responses to an incoming Query have been provided. */
+message QueryReference {
+
+    /* The identifier of the query request. */
+    string request_id = 1;
+}
+
+/* Message indicating that query has been completed. */
 message QueryComplete {
 
     /* A unique identifier for this message */
@@ -79,6 +91,16 @@ message QueryComplete {
 
     /* The identifier of the incoming query to complete */
     string request_id = 2;
+}
+
+/* Message indicating that consumer is requesting more messages from producer. */
+message QueryFlowControl {
+
+    /* The identifier of the incoming query to complete */
+    QueryReference query_reference = 1;
+
+    /* Number of messages requested */
+    int64 permits = 2;
 }
 
 /* Message representing an incoming Query */
