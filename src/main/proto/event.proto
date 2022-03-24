@@ -124,8 +124,8 @@ message StartTransformationRequest {
 message ApplyTransformationRequest {
     /* the identification of the transformation */
     TransformationId transformation_id = 1;
-    /* the token of the last updated event in this transformation */
-    int64 last_event_token = 2;
+    /* the sequence of the last entry in this transformation */
+    int64 last_sequence = 2;
     /* flag to indicate that Axon Server should preserve old versions of the updated events */
     bool keep_old_versions = 3;
 }
