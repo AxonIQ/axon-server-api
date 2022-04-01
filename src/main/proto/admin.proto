@@ -222,12 +222,20 @@ message UserOverview {
 
 service EventProcessorAdminService {
   /*The following api return a stream of Empty to allow the server to complete the stream without any result.*/
+
+  /* Request to pause an event processor */
   rpc PauseEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  /* Request to start an event processor */
   rpc StartEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  /* Request to split the largest segment of a streaming event processor */
   rpc SplitEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  /* Request to merge the smallest two segments of a streaming event processor */
   rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
+  /* Request to move the specified segment of a streaming event processor to the desired destination */
   rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
+  /* Retrieves all event processors registered in an Axon Server cluster */
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
+  /* Retrieves all event processors registered in an Axon Server cluster for the specified component*/
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
   rpc LoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
   rpc SetAutoLoadBalanceStrategy(LoadBalanceRequest) returns (stream google.protobuf.Empty);
@@ -235,38 +243,69 @@ service EventProcessorAdminService {
 }
 
 message EventProcessorIdentifier {
+  /*  the name of the processor */
   string processor_name = 1;
+
+  /* the identifier of the token store this event processor is using */
   string token_store_identifier = 2;
 }
 
 message MoveSegment {
+  /* the identifier of the event processor */
   EventProcessorIdentifier event_processor = 1;
+
+  /* the id of the segment to move */
   int32 segment = 2;
+
+  /* the desired destination for the segment */
   string target_client_id = 3;
 }
 
 message EventProcessor {
+  /* the identifier of the event processor */
   EventProcessorIdentifier identifier = 1;
+  /* the event processor mode (subscribing, tracking, pooled) */
   string mode = 2;
+  /* true if the event processor is streaming, false otherwise */
   bool isStreaming = 3;
+  /* client instances that subscribed the event processor */
   repeated EventProcessorInstance client_instance = 4;
 }
 
 message EventProcessorInstance  {
+  /* the client identifier */
   string client_id = 1;
+  /* true if the client instance of the event processor is running, false otherwise */
   bool isRunning = 2;
-  int32 max_segments = 3;
+  /* the max number of segments that this client can claim*/
+  int32 max_capacity = 3;
+  /* status of all segments claimed by the client */
   repeated EventProcessorSegment claimed_segment = 4;
 }
 
 message EventProcessorSegment {
+  /* the identifier of the segment */
   int32 id = 1;
+
+  /* the fractional unit representing the size of the segment*/
   int32 one_part_of = 2;
+
+  /* the id of the client that claimed the segment */
   string claimed_by = 3;
+
+  /* true if the segment has ever reached the head of the stream since it was started, false otherwise */
   bool is_caughtUp = 4;
+
+  /* true if the segment is replaying, false otherwise */
   bool is_replaying = 5;
+
+  /* the approximate position of the token */
   int64 token_position = 6;
+
+  /* true if the segment is in an error loop, false otherwise */
   bool is_in_error = 7;
+
+  /* the error description, if the segment is in error */
   string error = 8;
 }
 
