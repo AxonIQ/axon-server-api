@@ -22,6 +22,8 @@ service ContextAdminService {
 
 service ReplicationGroupAdminService {
 
+  rpc GetNodes (google.protobuf.Empty) returns (stream NodeOverview) {}
+
   rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (stream google.protobuf.Empty);
 
   rpc GetReplicationGroups(google.protobuf.Empty) returns (stream ReplicationGroupOverview);
@@ -224,10 +226,13 @@ service EventProcessorAdminService {
   rpc MergeEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
   /* Request to move the specified segment of a streaming event processor to the desired destination */
   rpc MoveEventProcessorSegment(MoveSegment) returns (AdminActionResult);
-  /* Retrieves all event processor registered in AS cluster */
+  /* Retrieves all event processors registered in an Axon Server cluster */
   rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
-  /* Retrieves all event processor registered in AS cluster for the specified component*/
+  /* Retrieves all event processors registered in an Axon Server cluster for the specified component*/
   rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
+  rpc LoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc SetAutoLoadBalanceStrategy(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc GetBalancingStrategies(google.protobuf.Empty) returns (stream LoadBalancingStrategy);
 }
 
 message AdminActionResult {
@@ -306,4 +311,36 @@ message EventProcessorSegment {
 
   /* the error description, if the segment is in error */
   string error = 8;
+}
+
+message LoadBalanceRequest {
+  EventProcessorIdentifier processor = 1;
+  string strategy = 2;
+}
+
+message LoadBalancingStrategy {
+  string strategy = 1;
+  string label = 2;
+}
+
+/* Message containing connection information for an AxonServer Node */
+message NodeOverview {
+
+  /* The host name to use when connecting to this node */
+  string host_name = 1;
+
+  /* The port number for gRPC connections */
+  int32 grpc_port = 2;
+
+  /* The port number for HTTP connections */
+  int32 http_port = 3;
+
+  /* The unique name of the node to connect with, for purpose of debugging */
+  string node_name = 4;
+
+  /* List of replication groups that belongs to this node */
+  repeated string replication_groups = 5;
+
+  /* List of tags associated with this node */
+  map<string,string> tags = 6;
 }
