@@ -68,7 +68,7 @@ jobs:
           color: danger
 
       - name: Trigger plugin API build
-        if: success()
+        if: github.github.head_ref == null && success()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.PAT_TOKEN }}

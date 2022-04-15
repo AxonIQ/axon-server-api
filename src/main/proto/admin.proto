@@ -10,6 +10,8 @@ service ContextAdminService {
 
   rpc CreateContext(CreateContextRequest) returns (stream google.protobuf.Empty) ;
 
+  rpc UpdateContextProperties(UpdateContextPropertiesRequest) returns (stream google.protobuf.Empty) ;
+
   rpc DeleteContext(DeleteContextRequest) returns (stream google.protobuf.Empty) ;
 
   rpc GetContext(GetContextRequest) returns (ContextOverview) ;
@@ -44,6 +46,11 @@ message CreateContextRequest {
   map<string, string> meta_data = 3;
 }
 
+message UpdateContextPropertiesRequest {
+  string name = 1;
+  map<string, string> meta_data = 3;
+}
+
 message DeleteContextRequest {
   string name = 1;
   bool preserveEventStore = 2;
@@ -74,6 +81,8 @@ enum ContextUpdateType {
   /* context has been removed */
   DELETED = 1;
 
+  /* context has been updated */
+  UPDATED = 2;
 }
 
 message CreateReplicationGroupRequest {
