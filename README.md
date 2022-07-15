@@ -3,7 +3,9 @@
 This module contains the protobuf definitions of the services and messages provided by
 AxonServer.
 
-The API definitions are structured around 5 files:
+The API definitions are structured around 6 files:
+
+- `admin.proto` - contains services and messages to monitor and control Axon Server
 - `common.proto` - contains messages commonly used throughout the services
 - `control.proto` - contains services and messages to monitor and control application components
 - `command.proto` - contains the service and message definitions specific to the dispatching and handling of commands.
@@ -11,9 +13,11 @@ The API definitions are structured around 5 files:
 - `query.proto` - contains services and messages for dispatching and handling queries
 
 ## Building a client
+
 ### Generating stubs
 
-Based on the protobuf files, stubs can be generated for several languages and platforms. Visit the [gRPC quick start](https://www.grpc.io/docs/quickstart/) page for your language. 
+Based on the protobuf files, stubs can be generated for several languages and platforms. Visit
+the [gRPC quick start](https://www.grpc.io/docs/quickstart/) page for your language.
 
 ### Attaching security headers
 
