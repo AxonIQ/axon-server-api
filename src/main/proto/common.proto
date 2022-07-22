@@ -66,6 +66,12 @@ enum ProcessingKey {
 
     // do not reuse reserved number to ensure forward and backward compatibility
     reserved 4, 5, 6;
+
+    /* key indicating whether Axon Server supports streaming. */
+    SERVER_SUPPORTS_STREAMING = 7;
+
+    /* key indicating whether Client supports streaming. */
+    CLIENT_SUPPORTS_STREAMING = 8;
 }
 
 /* Message containing details of an error */
@@ -134,5 +140,8 @@ enum TaskStatus {
     RUNNING = 3;
     // Task execution is in progress
     CANCELLED = 4;
+}
 
+message Component {
+    string component = 1;
 }

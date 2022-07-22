@@ -1,6 +1,7 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.admin;
 import "google/protobuf/empty.proto";
+import "common.proto";
 option java_multiple_files = true;
 
 //************************ ContextAdminService *****************************
@@ -8,6 +9,8 @@ option java_multiple_files = true;
 service ContextAdminService {
 
   rpc CreateContext(CreateContextRequest) returns (stream google.protobuf.Empty) ;
+
+  rpc UpdateContextProperties(UpdateContextPropertiesRequest) returns (stream google.protobuf.Empty) ;
 
   rpc DeleteContext(DeleteContextRequest) returns (stream google.protobuf.Empty) ;
 
@@ -20,6 +23,8 @@ service ContextAdminService {
 }
 
 service ReplicationGroupAdminService {
+
+  rpc GetNodes (google.protobuf.Empty) returns (stream NodeOverview) {}
 
   rpc CreateReplicationGroup(CreateReplicationGroupRequest) returns (stream google.protobuf.Empty);
 
@@ -38,6 +43,11 @@ service ReplicationGroupAdminService {
 message CreateContextRequest {
   string name = 1;
   string replicationGroupName = 2;
+  map<string, string> meta_data = 3;
+}
+
+message UpdateContextPropertiesRequest {
+  string name = 1;
   map<string, string> meta_data = 3;
 }
 
@@ -71,6 +81,8 @@ enum ContextUpdateType {
   /* context has been removed */
   DELETED = 1;
 
+  /* context has been updated */
+  UPDATED = 2;
 }
 
 message CreateReplicationGroupRequest {
@@ -158,7 +170,7 @@ message ApplicationContextRole {
 }
 
 message Token {
- string token = 1;
+  string token = 1;
 }
 
 message ApplicationId {
@@ -212,20 +224,132 @@ message UserOverview {
 
 service EventProcessorAdminService {
   /*The following api return a stream of Empty to allow the server to complete the stream without any result.*/
-  rpc PauseEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
-  rpc StartEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
-  rpc SplitEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
-  rpc MergeEventProcessor(EventProcessorIdentifier) returns (stream google.protobuf.Empty);
-  rpc MoveEventProcessorSegment(MoveSegment) returns (stream google.protobuf.Empty);
+
+  /* Request to pause an event processor */
+  rpc PauseEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
+  /* Request to start an event processor */
+  rpc StartEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
+  /* Request to split the largest segment of a streaming event processor */
+  rpc SplitEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
+  /* Request to merge the smallest two segments of a streaming event processor */
+  rpc MergeEventProcessor(EventProcessorIdentifier) returns (AdminActionResult);
+  /* Request to move the specified segment of a streaming event processor to the desired destination */
+  rpc MoveEventProcessorSegment(MoveSegment) returns (AdminActionResult);
+  /* Retrieves all event processors registered in an Axon Server cluster */
+  rpc GetAllEventProcessors(google.protobuf.Empty) returns (stream EventProcessor);
+  /* Retrieves all event processors registered in an Axon Server cluster for the specified component*/
+  rpc GetEventProcessorsByComponent(Component) returns (stream EventProcessor);
+  rpc LoadBalanceProcessor(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc SetAutoLoadBalanceStrategy(LoadBalanceRequest) returns (stream google.protobuf.Empty);
+  rpc GetBalancingStrategies(google.protobuf.Empty) returns (stream LoadBalancingStrategy);
+}
+
+message AdminActionResult {
+  Result result = 1;
+}
+
+enum Result {
+  /* The handler confirmed that the action was executed successfully */
+  SUCCESS = 0;
+  /* The handler has accepted the result, no result will be returned */
+  ACCEPTED = 1;
 }
 
 message EventProcessorIdentifier {
+  /*  the name of the processor */
   string processor_name = 1;
+
+  /* the identifier of the token store this event processor is using */
   string token_store_identifier = 2;
 }
 
 message MoveSegment {
+  /* the identifier of the event processor */
   EventProcessorIdentifier event_processor = 1;
+
+  /* the id of the segment to move */
   int32 segment = 2;
+
+  /* the desired destination for the segment */
   string target_client_id = 3;
+}
+
+message EventProcessor {
+  /* the identifier of the event processor */
+  EventProcessorIdentifier identifier = 1;
+  /* the event processor mode (subscribing, tracking, pooled) */
+  string mode = 2;
+  /* true if the event processor is streaming, false otherwise */
+  bool isStreaming = 3;
+  /* client instances that subscribed the event processor */
+  repeated EventProcessorInstance client_instance = 4;
+}
+
+message EventProcessorInstance  {
+  /* the client identifier */
+  string client_id = 1;
+  /* true if the client instance of the event processor is running, false otherwise */
+  bool isRunning = 2;
+  /* the max number of segments that this client can claim*/
+  int32 max_capacity = 3;
+  /* status of all segments claimed by the client */
+  repeated EventProcessorSegment claimed_segment = 4;
+}
+
+message EventProcessorSegment {
+  /* the identifier of the segment */
+  int32 id = 1;
+
+  /* the fractional unit representing the size of the segment*/
+  int32 one_part_of = 2;
+
+  /* the id of the client that claimed the segment */
+  string claimed_by = 3;
+
+  /* true if the segment has ever reached the head of the stream since it was started, false otherwise */
+  bool is_caughtUp = 4;
+
+  /* true if the segment is replaying, false otherwise */
+  bool is_replaying = 5;
+
+  /* the approximate position of the token */
+  int64 token_position = 6;
+
+  /* true if the segment is in an error loop, false otherwise */
+  bool is_in_error = 7;
+
+  /* the error description, if the segment is in error */
+  string error = 8;
+}
+
+message LoadBalanceRequest {
+  EventProcessorIdentifier processor = 1;
+  string strategy = 2;
+}
+
+message LoadBalancingStrategy {
+  string strategy = 1;
+  string label = 2;
+}
+
+/* Message containing connection information for an AxonServer Node */
+message NodeOverview {
+
+  /* The host name to use when connecting to this node */
+  string host_name = 1;
+
+  /* The port number for gRPC connections */
+  int32 grpc_port = 2;
+
+  /* The port number for HTTP connections */
+  int32 http_port = 3;
+
+  /* The unique name of the node to connect with, for purpose of debugging */
+  string node_name = 4;
+
+  /* List of replication groups that belongs to this node */
+  repeated string replication_groups = 5;
+
+  /* List of tags associated with this node */
+  map<string,string> tags = 6;
 }

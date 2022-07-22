@@ -66,3 +66,16 @@ jobs:
           channel_id: C015XFURSJU
           status: FAILED
           color: danger
+
+      - name: Trigger plugin API build
+        if: github.github.head_ref == null && success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'AxonIQ',
+              repo: 'axon-server-plugin-api',
+              workflow_id: 'maven.yml',
+              ref: 'master'
+            })
