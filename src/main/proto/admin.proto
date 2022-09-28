@@ -277,12 +277,16 @@ message MoveSegment {
 message EventProcessor {
   /* the identifier of the event processor */
   EventProcessorIdentifier identifier = 1;
+
   /* the event processor mode (subscribing, tracking, pooled) */
   string mode = 2;
+
   /* true if the event processor is streaming, false otherwise */
   bool isStreaming = 3;
+
   /* client instances that subscribed the event processor */
   repeated EventProcessorInstance client_instance = 4;
+
   /* current load balancing strategy name for the event processor */
   string load_balancing_strategy_name = 5;
 }

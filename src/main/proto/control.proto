@@ -200,6 +200,9 @@ message EventProcessorInfo {
        This dictates whether streaming operations, like split and merge, are supported by this processor.
      */
     bool is_streaming_processor = 9;
+
+    /* current load balancing strategy name for the event processor */
+    string load_balancing_strategy_name = 10;
 }
 
 /* Message providing reference to an Event Processor */
