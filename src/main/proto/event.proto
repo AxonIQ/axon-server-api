@@ -101,6 +101,15 @@ message Transformation {
     TransformationState state = 2;
     int64 sequence = 3;
     ErrorMessage error = 4;
+    string context = 5;
+    string description = 6;
+    int64 created_at = 7;
+    string created_by = 8;
+    int64 cancelled_at = 9;
+    string cancel_requester = 10;
+    int64 applied_at = 11;
+    string apply_requester = 12;
+    int32 version = 13;
 }
 
 enum TransformationState {
