@@ -2,10 +2,10 @@ syntax = "proto3";
 package io.axoniq.axonserver.grpc.admin;
 import "google/protobuf/empty.proto";
 import "common.proto";
+import "control.proto";
 option java_multiple_files = true;
 
 //************************ ContextAdminService *****************************
-
 service ContextAdminService {
 
   rpc CreateContext(CreateContextRequest) returns (stream google.protobuf.Empty) ;
@@ -154,6 +154,8 @@ service  ApplicationAdminService {
   rpc GetApplications(google.protobuf.Empty) returns (stream ApplicationOverview);
 
   rpc RefreshToken(ApplicationId) returns (Token);
+
+  rpc GetConnectedApplicationsByContext(ContextId) returns (ConnectedApplicationOverview);
 }
 
 message ApplicationRequest {
@@ -182,6 +184,33 @@ message ApplicationOverview {
   string description = 2;
   repeated ApplicationContextRole rolesPerContext = 3;
   map<string, string> meta_data = 4;
+}
+
+message ContextId {
+  string contextName = 1;
+}
+
+message ConnectedApplicationOverview {
+  repeated string nodes = 1;
+  repeated ClientApplication applications = 2;
+}
+
+message ClientApplication {
+  string name = 1;
+  repeated Client clients = 2;
+  repeated string commands = 3;
+  repeated QueryInfo queries = 4;
+}
+
+message Client {
+  string name = 1;
+  string node = 2;
+  repeated io.axoniq.axonserver.grpc.control.EventProcessorInfo processors = 3;
+}
+
+message QueryInfo {
+  string request = 1;
+  repeated string responseTypes = 2;
 }
 
 //************************ UserAdminService *****************************
@@ -220,8 +249,8 @@ message UserOverview {
   bool enabled = 2;
   repeated UserRoleOverview userRoles = 3;
 }
-//***************************** Event Processor Admin Service ***************************
 
+//***************************** Event Processor Admin Service ***************************
 service EventProcessorAdminService {
   /*The following api return a stream of Empty to allow the server to complete the stream without any result.*/
 
