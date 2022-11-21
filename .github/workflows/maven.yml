@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - axon-server-api-*.*.x
   pull_request:
 
 jobs:
