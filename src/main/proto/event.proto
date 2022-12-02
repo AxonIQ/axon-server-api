@@ -86,13 +86,12 @@ service EventTransformationService {
     rpc ApplyTransformation(ApplyTransformationRequest) returns (stream google.protobuf.Empty) {
     }
 
-    // Rollback changes made by the last transformation
-    rpc RollbackTransformation(TransformationId) returns (stream google.protobuf.Empty) {
-    }
-
     // Delete old versions of events updated by a transformation
-    rpc DeleteOldVersions(google.protobuf.Empty) returns (stream google.protobuf.Empty) {
+    rpc Compact(CompactionRequest) returns (stream google.protobuf.Empty) {
     }
+}
+
+message CompactionRequest {
 
 }
 
