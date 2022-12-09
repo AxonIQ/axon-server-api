@@ -290,6 +290,9 @@ message EventProcessorIdentifier {
 
   /* the identifier of the token store this event processor is using */
   string token_store_identifier = 2;
+
+  /* the context name where the processor is located */
+  string context_name = 3;
 }
 
 message MoveSegment {
