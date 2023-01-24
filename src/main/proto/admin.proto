@@ -291,7 +291,7 @@ message EventProcessorIdentifier {
   /* the identifier of the token store this event processor is using */
   string token_store_identifier = 2;
 
-  /* optional paameter to pass in the context name to indicate where the processor is located */
+  /* optional parameter to pass in the context name to indicate where the processor is located */
   string context_name = 3;
 }
 
