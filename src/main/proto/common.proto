@@ -145,3 +145,7 @@ enum TaskStatus {
 message Component {
     string component = 1;
 }
+
+message Principal {
+    string user = 1;
+}

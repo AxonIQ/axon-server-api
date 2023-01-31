@@ -113,13 +113,10 @@ message Transformation {
 
 enum TransformationState {
     ACTIVE = 0;
-    ROLLING_BACK = 1;
-    ROLLED_BACK = 2;
-    CANCELLING = 3;
-    CANCELLED = 4;
-    APPLYING = 5;
-    APPLIED = 6;
-    FATAL = 7;
+    CANCELLED = 1;
+    APPLYING = 2;
+    APPLIED = 3;
+    FATAL = 4;
 }
 
 /* Request to start a transformation */
