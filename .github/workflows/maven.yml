@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - master
-  pull_request:
+      - axon-server-api-*.*.x
+  workflow_dispatch:
 
 jobs:
   build:

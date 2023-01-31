@@ -147,6 +147,9 @@ message QueryEventsRequest {
 
     /* If true, snapshots will be queried instead of events */
     bool query_snapshots = 5;
+
+    /* Query from this context, not from the default context of the connection */
+    string context_name = 6;
 }
 
 /* A message describing a response to a Query request */
