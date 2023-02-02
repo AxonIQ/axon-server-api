@@ -389,5 +389,34 @@ message NodeOverview {
   repeated string replication_groups = 5;
 
   /* List of tags associated with this node */
-  map<string,string> tags = 6;
+  map<string, string> tags = 6;
+}
+
+/* AuthenticationService, allows to use Axon Server as authentication provider */
+service AuthenticationService {
+  /* Authenticate a user, returns the user's roles */
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (UserRoles);
+
+  /* Authenticate based on an application token, returns the application's roles */
+  rpc AuthenticateToken(Token) returns (ApplicationRoles);
+}
+
+message AuthenticateUserRequest {
+  string userName = 1;
+  string password = 2;
+}
+
+message ApplicationRoles {
+  string applicationName = 1;
+  repeated ContextRole applicationRole = 2;
+}
+
+message ContextRole {
+  string role = 1;
+  string context = 2;
+}
+
+message UserRoles {
+  string userName = 1;
+  repeated ContextRole userRoles = 3;
 }
