@@ -141,7 +141,7 @@ message TransformRequest {
     int64 sequence = 2;
     oneof request {
         /* Replaces the content of an event with the new content */
-        TransformedEvent event = 3;
+        TransformedEvent replace_event = 3;
         /* Deletes the content of an event */
         DeletedEvent delete_event = 4;
     }
