@@ -1,6 +1,7 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.event;
 import "common.proto";
+import "google/protobuf/empty.proto";
 option java_multiple_files = true;
 
 /* Service providing operations against the EventStore functionality of Axon Server */
@@ -62,6 +63,116 @@ service EventScheduler {
     rpc CancelScheduledEvent (CancelScheduledEventRequest) returns (InstructionAck) {
     }
 }
+
+/* Service to transform events in an event store */
+service EventTransformationService {
+
+    rpc Transformations(google.protobuf.Empty) returns (stream Transformation) {
+    }
+
+    // Start a new transformation.
+    rpc StartTransformation(StartTransformationRequest) returns (TransformationId) {
+    }
+
+    // Add updated events to a transformation.
+    rpc TransformEvents(stream TransformRequest) returns (stream TransformRequestAck) {
+    }
+
+    // Cancel a transformation before it is applied.
+    rpc CancelTransformation(TransformationId) returns (stream google.protobuf.Empty) {
+    }
+
+    // Apply the changes from a transformation in the event store.
+    rpc ApplyTransformation(ApplyTransformationRequest) returns (stream google.protobuf.Empty) {
+    }
+
+    // Delete old versions of events updated by a transformation
+    rpc Compact(CompactionRequest) returns (stream google.protobuf.Empty) {
+    }
+}
+
+message CompactionRequest {
+
+}
+
+message Transformation {
+    TransformationId transformationId = 1;
+    TransformationState state = 2;
+    int64 sequence = 3;
+    ErrorMessage error = 4;
+    string context = 5;
+    string description = 6;
+    int64 created_at = 7;
+    string created_by = 8;
+    int64 cancelled_at = 9;
+    string cancel_requester = 10;
+    int64 applied_at = 11;
+    string apply_requester = 12;
+    int32 version = 13;
+}
+
+enum TransformationState {
+    ACTIVE = 0;
+    CANCELLED = 1;
+    APPLYING = 2;
+    APPLIED = 3;
+    FATAL = 4;
+}
+
+/* Request to start a transformation */
+message StartTransformationRequest {
+    /* a description of the purpose of this transformation, for reference only */
+    string description = 1;
+}
+
+/* Request to apply a transformation */
+message ApplyTransformationRequest {
+    /* the identification of the transformation */
+    TransformationId transformation_id = 1;
+    /* the sequence of the last entry in this transformation */
+    int64 last_sequence = 2;
+}
+
+/* Message containing one event to transform within a transformation */
+message TransformRequest {
+    /* the identification of the transformation */
+    TransformationId transformation_id = 1;
+    /* The sequence of the current transformation */
+    int64 sequence = 2;
+    oneof request {
+        /* Replaces the content of an event with the new content */
+        TransformedEvent replace_event = 3;
+        /* Deletes the content of an event */
+        DeletedEvent delete_event = 4;
+    }
+}
+
+/* Replaces the content of an event with the new content */
+message TransformedEvent {
+    /* the global index of the event to replace */
+    int64 token = 1;
+    /* the new content of the event */
+    Event event = 2;
+}
+
+/* Deletes the content of an event */
+message DeletedEvent {
+    /* the global index of the event to clear */
+    int64 token = 1;
+}
+
+/* Uniquely identifies a transformation */
+message TransformationId {
+    string id = 1;
+}
+
+/* Acknowledgement that event with given token has been transformed successfully */
+message TransformRequestAck {
+
+    /* The sequence of the transformation request */
+    int64 sequence = 1;
+}
+
 
 /* Request message to schedule an event */
 message ScheduleEventRequest {
