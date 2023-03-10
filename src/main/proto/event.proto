@@ -67,75 +67,92 @@ service EventScheduler {
 /* Service to transform events in an event store */
 service EventTransformationService {
 
+    // Returns the list of all transformations.
     rpc Transformations(google.protobuf.Empty) returns (stream Transformation) {
     }
 
-    // Start a new transformation.
+    // Starts a new transformation.
     rpc StartTransformation(StartTransformationRequest) returns (TransformationId) {
     }
 
-    // Add updated events to a transformation.
+    // Adds requests to transform an event to a transformation.
     rpc TransformEvents(stream TransformRequest) returns (stream TransformRequestAck) {
     }
 
-    // Cancel a transformation before it is applied.
+    // Cancels a transformation before it is applied.
     rpc CancelTransformation(TransformationId) returns (stream google.protobuf.Empty) {
     }
 
-    // Apply the changes from a transformation in the event store.
+    // Applies the changes from a transformation in the event store.
     rpc ApplyTransformation(ApplyTransformationRequest) returns (stream google.protobuf.Empty) {
     }
 
-    // Delete old versions of events updated by a transformation
+    // Deletes old versions of events updated by a transformation.
     rpc Compact(CompactionRequest) returns (stream google.protobuf.Empty) {
     }
 }
 
+/* Request to compact event store. */
 message CompactionRequest {
-
 }
 
+/* The transformation data. */
 message Transformation {
+
+    // The identifier of the transformation.
     TransformationId transformationId = 1;
+
+    // The state of the transformation
     TransformationState state = 2;
+
+    // The sequence of the last transformation action stored. Needed for checking sequential consistency of requests.
     int64 sequence = 3;
-    ErrorMessage error = 4;
-    string context = 5;
-    string description = 6;
-    int64 created_at = 7;
-    string created_by = 8;
-    int64 cancelled_at = 9;
-    string cancel_requester = 10;
-    int64 applied_at = 11;
-    string apply_requester = 12;
-    int32 version = 13;
+
+    // The bounded context in which this transformation is being executed.
+    string context = 4;
+
+    // The description of the transformation.
+    string description = 5;
+
+    // The timestamp at which the transformation was applied. Set to -1 if the transformation was not applied.
+    int64 applied_at = 6;
+
+    // The username of user who requested the transformation to be applied. Empty if the transformation was not applied.
+    string apply_requester = 7;
+
+    // The version of the transformation. The sequence
+    int32 version = 8;
 }
 
+/* The state of the transformation. */
 enum TransformationState {
+    // The transformation is opened, able to receive request to transform events, or to be applied or cancelled.
     ACTIVE = 0;
+    // The transformation has been cancelled. This a final state.
     CANCELLED = 1;
+    // The transformation is in progress of applying its actions to the event store.
     APPLYING = 2;
+    // The transformation has been applied to the event store. This a final state.
     APPLIED = 3;
-    FATAL = 4;
 }
 
 /* Request to start a transformation */
 message StartTransformationRequest {
-    /* a description of the purpose of this transformation, for reference only */
+    /* A description of the purpose of this transformation, for reference only */
     string description = 1;
 }
 
 /* Request to apply a transformation */
 message ApplyTransformationRequest {
-    /* the identification of the transformation */
+    /* The identification of the transformation */
     TransformationId transformation_id = 1;
-    /* the sequence of the last entry in this transformation */
+    /* The sequence of the last entry in this transformation */
     int64 last_sequence = 2;
 }
 
 /* Message containing one event to transform within a transformation */
 message TransformRequest {
-    /* the identification of the transformation */
+    /* The identification of the transformation */
     TransformationId transformation_id = 1;
     /* The sequence of the current transformation */
     int64 sequence = 2;
@@ -149,20 +166,21 @@ message TransformRequest {
 
 /* Replaces the content of an event with the new content */
 message TransformedEvent {
-    /* the global index of the event to replace */
+    /* The global index of the event to replace */
     int64 token = 1;
-    /* the new content of the event */
+    /* The new content of the event */
     Event event = 2;
 }
 
 /* Deletes the content of an event */
 message DeletedEvent {
-    /* the global index of the event to clear */
+    /* The global index of the event to clear */
     int64 token = 1;
 }
 
 /* Uniquely identifies a transformation */
 message TransformationId {
+    // The value of the identifier.
     string id = 1;
 }
 
