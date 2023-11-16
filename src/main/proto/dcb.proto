@@ -1,0 +1,64 @@
+syntax = "proto3";
+package io.axoniq.axonserver.grpc.event.dcb;
+import "common.proto";
+option java_multiple_files = true;
+
+service DcbEventStore {
+  rpc AppendEvent (stream AppendEventsRequest) returns (AppendEventsResponse) {
+
+  }
+}
+
+message AppendEventsRequest {
+  oneof request {
+    ConsistencyCondition condition = 1;
+    TaggedEvent event = 2;
+    Commit commit = 3;
+  }
+}
+
+message TaggedEvent {
+  Event event = 1;
+  repeated Tag tags = 2;
+}
+
+message Tag {
+  string key = 1;
+  string value = 2;
+}
+
+message Event {
+
+}
+
+message Commit {
+
+}
+
+message ConsistencyCondition {
+  Position consistencyMarker = 1;
+  StreamQuery streamQuery = 2;
+}
+
+message Position {
+  int64 global_sequence = 1;
+}
+
+message StreamQuery {
+
+}
+
+message AppendEventsResponse {
+  oneof response {
+    AppendEventsSuccess success = 1;
+    AppendEventsFailure failure = 2;
+  }
+}
+
+message AppendEventsSuccess {
+  Position lastPosition = 1;
+}
+
+message AppendEventsFailure {
+  ErrorMessage errorMessage = 1;
+}
