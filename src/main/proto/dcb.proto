@@ -18,7 +18,7 @@ message AppendEventsRequest {
 message TaggedEvent {
   Event event = 1;
   string type = 2;
-  repeated Tag tags = 3;
+  repeated Tag tag = 3;
 }
 
 message Tag {
@@ -33,9 +33,10 @@ message Event {
   bytes payload = 2;
 }
 
-message TimestampedEvent {
-  int64 timestamp = 1;
-  TaggedEvent event = 2;
+message ServerSentEvent {
+  repeated string filter_key = 1;
+  int64 timestamp = 2;
+  TaggedEvent tagged_event = 3;
 }
 
 message ConsistencyCondition {
@@ -52,10 +53,17 @@ message StreamQuery {
 }
 
 message Criterion {
+  string filter_key = 1;
+  oneof criterion {
+    TagsAndTypeCriterion tags_and_types = 2;
+  }
+}
+
+message TagsAndTypeCriterion {
   string type = 1;
-  repeated Tag tags = 2;
+  repeated Tag tag = 2;
 }
 
 message AppendEventsResponse {
-  Position lastPosition = 1;
+  Position last_position = 1;
 }
