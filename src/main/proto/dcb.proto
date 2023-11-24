@@ -29,8 +29,11 @@ message Tag {
 message Event {
   /* The unique identifier of this event */
   string identifier = 1;
+
+  reserved 2, 3, 4, 5, 6, 7, 8;
   /* The Payload of the Event */
-  bytes payload = 2;
+  bytes payload = 9;
+
 }
 
 message ServerSentEvent {
@@ -49,7 +52,7 @@ message Position {
 }
 
 message StreamQuery {
-  repeated Criterion criteria = 1;
+  repeated Criterion criterion = 1;
 }
 
 message Criterion {
