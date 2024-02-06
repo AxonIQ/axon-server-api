@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - axon-server-api-*.*.x
+      - persisted-streams
   workflow_dispatch:
 
 jobs:
