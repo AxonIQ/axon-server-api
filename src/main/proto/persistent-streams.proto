@@ -8,9 +8,9 @@ option java_multiple_files = true;
    track of the progress. All operations require a header (AxonIQ-Context) to be passed with each request to define
    the context.
  */
-service EventStreamService {
+service PersistentStreamService {
   /* Open a persistent event stream connection from a client. Creates the stream if it does not exist. */
-  rpc OpenStream(stream StreamCommand) returns (stream StreamSignal) {
+  rpc OpenStream(stream StreamRequest) returns (stream StreamSignal) {
 
   }
 
@@ -67,10 +67,10 @@ message StreamConnection {
 
 /* Request to set up a connection to a stream. Clients should first submit an OpenRequest on this connection
    to connect to a stream and can then submit ProgressRequest messages to report progress.  */
-message StreamCommand {
+message StreamRequest {
   oneof request {
-    OpenRequest open = 1; /* the initial message to connect to a stream */
-    ProgressRequest progress = 2; /* sends progress in processing events to Axon Server */
+    Open open = 1; /* the initial message to connect to a stream */
+    Acknowledgement acknowledgment = 2; /* sends progress in processing events to Axon Server */
   }
 }
 
@@ -88,7 +88,7 @@ message UpdateStreamRequest {
 
 
 /* Request to open a connection to a persistent stream */
-message OpenRequest {
+message Open {
   string stream_id = 1; /* the unique identification of the stream */
   string client_id = 2; /* the unique identification of the client */
   InitializationProperties initialization_properties = 3; /* properties to create the stream if it does not exist */
@@ -110,7 +110,7 @@ message SequencingPolicy {
 }
 
 /* Message to report progress of event processing for a specific segment in a stream */
-message ProgressRequest {
+message Acknowledgement {
   int32 segment = 1; /* the segment number */
   int64 position = 2; /* the position of the last processed event */
 }
