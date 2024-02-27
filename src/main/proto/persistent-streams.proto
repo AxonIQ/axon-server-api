@@ -26,23 +26,23 @@ service PersistentStreamService {
 
   /* Returns a list of all persistent event streams defined (for the context). For each event stream it returns
     the progress per segment.  */
-  rpc ListStreams( google.protobuf.Empty) returns (stream StreamStatus) {
+  rpc ListStreams(google.protobuf.Empty) returns (stream StreamStatus) {
 
   }
 
   /* Returns the clients connected to all persistent event streams defined (for the context). For each client it returns
     the segments that are received by the client.  */
-  rpc ListConnections( google.protobuf.Empty) returns (stream StreamConnections) {
+  rpc ListConnections(google.protobuf.Empty) returns (stream StreamConnections) {
 
   }
 }
 
 /* Contains the current status of a persistent stream */
 message StreamStatus {
-  string stream_id = 1; /* the unique identification of the stream */
-  string stream_name = 2; /* a name for the stream */
+  string stream_id = 1; /* the unique identification of the persistent stream */
+  string stream_name = 2; /* a name for the persistent stream */
   SequencingPolicy sequencing_policy = 3; /* the policy used to distribute events across segments. */
-  string filter = 4; /* an expression to filter events */
+  string filter = 4; /* an expression to filter events, same syntax as used for ad-hoc queries on the event store */
   repeated SegmentPosition segments = 5; /* the last confirmed position per segment */
 }
 
@@ -66,11 +66,11 @@ message StreamConnection {
 }
 
 /* Request to set up a connection to a stream. Clients should first submit an OpenRequest on this connection
-   to connect to a stream and can then submit ProgressRequest messages to report progress.  */
+   to connect to a stream and can then submit Acknowledgement messages to report progress.  */
 message StreamRequest {
   oneof request {
     Open open = 1; /* the initial message to connect to a stream */
-    Acknowledgement acknowledgment = 2; /* sends progress in processing events to Axon Server */
+    ProgressAcknowledgement acknowledgeProgress = 2; /* sends progress in processing events to Axon Server */
   }
 }
 
@@ -99,18 +99,18 @@ message InitializationProperties {
   int32 segments = 1; /* the initial number of segments */
   int64 initial_position = 2; /* the position in the event store to start reading from */
   SequencingPolicy sequencing_policy = 3; /* the sequencing policy */
-  string filter = 4;  /* an expression to filter events */
-  string stream_name = 5; /* a name for the stream */
+  string filter = 4; /* an expression to filter events, same syntax as used for ad-hoc queries on the event store */
+  string stream_name = 5; /* a name for the persistent stream */
 }
 
-/* Defines the policy used to distribute events across segments */
+/* Defines the policy used to distribute events across segments. The policy name must be known on the server. */
 message SequencingPolicy {
   string policy_name = 1; /* the name of the sequencing policy */
   repeated string parameter = 2; /* optional list of parameters used by the sequencing policy */
 }
 
 /* Message to report progress of event processing for a specific segment in a stream */
-message Acknowledgement {
+message ProgressAcknowledgement {
   int32 segment = 1; /* the segment number */
   int64 position = 2; /* the position of the last processed event */
 }
