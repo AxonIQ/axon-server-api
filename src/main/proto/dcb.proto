@@ -6,6 +6,10 @@ service DcbEventStore {
   rpc AppendEvent (stream AppendEventsRequest) returns (AppendEventsResponse) {
 
   }
+
+  rpc Events (StreamQuery) returns (stream ServerSentEvent) {
+
+  }
 }
 
 message AppendEventsRequest {
