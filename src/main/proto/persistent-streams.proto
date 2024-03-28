@@ -26,17 +26,15 @@ service PersistentStreamService {
 
   /* Returns a list of all persistent event streams defined (for the context). For each event stream it returns
     the progress per segment.  */
-  rpc ListStreams(google.protobuf.Empty) returns (stream StreamStatus) {
-
-  }
-
-  /* Returns the clients connected to all persistent event streams defined (for the context). For each client it returns
-    the segments that are received by the client.  */
-  rpc ListConnections(google.protobuf.Empty) returns (stream StreamConnections) {
+  rpc ListStreams(ListStreamsRequest) returns (stream StreamStatus) {
 
   }
 }
 
+/* request to list the persistent streams for a context */
+message ListStreamsRequest {
+
+}
 /* Contains the current status of a persistent stream */
 message StreamStatus {
   string stream_id = 1; /* the unique identification of the persistent stream */
@@ -50,19 +48,7 @@ message StreamStatus {
 message SegmentPosition {
   int32 segment = 1; /* the segment number */
   int64 position = 2; /* the last confirmed position */
-}
-
-/* Contains the current connections for a persistent stream */
-message StreamConnections {
-  string stream_id = 1; /* the unique identification of the stream */
-  string stream_name = 2; /* a name for the stream */
-  repeated StreamConnection segments_per_connection = 3; /* the segments held per client */
-}
-
-/* Contains the segments per client */
-message StreamConnection {
-  string client_id = 1; /* the unique identification of the client */
-  repeated int32 segments = 2; /* a list of segment numbers */
+  string client_id = 3; /* the connected client, empty if there is no client connected to this segment */
 }
 
 /* Request to set up a connection to a stream. Clients should first submit an OpenRequest on this connection
@@ -71,6 +57,7 @@ message StreamRequest {
   oneof request {
     Open open = 1; /* the initial message to connect to a stream */
     ProgressAcknowledgement acknowledgeProgress = 2; /* sends progress in processing events to Axon Server */
+    Requests requests = 3; /* request a number of messages for a segment */
   }
 }
 
@@ -113,6 +100,11 @@ message SequencingPolicy {
 message ProgressAcknowledgement {
   int32 segment = 1; /* the segment number */
   int64 position = 2; /* the position of the last processed event */
+}
+
+message Requests {
+  int32 segment = 1; /* the segment number */
+  int32 requests = 2; /* the number of messages to request */
 }
 
 /* Message sent by Axon Server to the client stream connection */
