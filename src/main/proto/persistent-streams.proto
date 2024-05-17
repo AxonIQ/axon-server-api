@@ -49,6 +49,7 @@ message SegmentPosition {
   int32 segment = 1; /* the segment number */
   int64 position = 2; /* the last confirmed position */
   string client_id = 3; /* the connected client, empty if there is no client connected to this segment */
+  string error = 4; /* optional error reported by the client for this segment */
 }
 
 /* Request to set up a connection to a stream. Clients should first submit an OpenRequest on this connection
@@ -58,7 +59,14 @@ message StreamRequest {
     Open open = 1; /* the initial message to connect to a stream */
     ProgressAcknowledgement acknowledgeProgress = 2; /* sends progress in processing events to Axon Server */
     Requests requests = 3; /* request a number of messages for a segment */
+    SegmentError error = 4; /* notifies an error */
   }
+}
+
+/* Request to notify Axon Server of an error on a persistent stream segment */
+message SegmentError {
+  int32 segment = 1; /* the segment number */
+  string error = 2; /* the error that occurred while processing the events for this segment */
 }
 
 /* Request to delete a persistent stream */
