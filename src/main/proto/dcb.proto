@@ -7,7 +7,7 @@ service DcbEventStore {
 
   }
 
-  rpc Events (StreamQuery) returns (stream ServerSentEvent) {
+  rpc Events (StreamQuery) returns (stream StreamQueryResult) {
 
   }
 }
@@ -38,6 +38,13 @@ message Event {
   /* The Payload of the Event */
   bytes payload = 9;
 
+}
+
+message StreamQueryResult {
+  oneof result {
+    ServerSentEvent event = 1;
+    Position consistency_marker = 2; // always a single value
+  }
 }
 
 message ServerSentEvent {
