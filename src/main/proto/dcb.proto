@@ -54,12 +54,42 @@ message ServerSentEvent {
 }
 
 message ConsistencyCondition {
+  /**
+- The Position to start checking for the consistency of an append
+- Examples
+  - When Consistency marker is n (where n > 0), event with Global Sequence Number n will not
+  be checked, but we start checking at event n + 1 (if existing)
+  - When Consistency marker is 0, the first event in the event store
+  (Global Sequence Number = 0) will not be checked
+  - When Consistency marker is the `Seed`, the check starts with the very first event (if any) in the event store
+  - When creating a new command model, `Seed` can be used to verify the
+    command model has never been used before.
+    Subsequent appends for this command model **must** use ConsistencyMarker of at least the
+    Global Sequence Number of the latest event in the command model
+   */
   Position consistency_marker = 1;
   StreamQuery stream_query = 2;
 }
 
+/**
+Marks the position in or before the event stream
+- Either
+  - The `Seed` alt names we thought about: Initial, Origin, Seed, Before, Null, Thingamajig, ∅
+  - Global Sequence Number of an event
+May contain shard or tier information as well.
+ */
 message Position {
-  int64 sequence = 1;
+  oneof raw {
+    int64 sequence = 1;
+    Seed seed = 2;
+  }
+}
+
+/**
+  Denotes the position before the start of the event stream
+ */
+message Seed{
+
 }
 
 message StreamQuery {
