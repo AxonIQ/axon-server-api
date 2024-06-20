@@ -91,7 +91,7 @@ message ConsistencyCondition {
     Global Sequence Number of the latest event in the command model
    */
   Position consistency_marker = 1;
-  SourceRequest stream_query = 2;
+  SourceRequest source_request = 2;
 }
 
 /**
