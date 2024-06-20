@@ -3,26 +3,27 @@ package io.axoniq.axonserver.grpc.event.dcb;
 option java_multiple_files = true;
 
 service DcbEventStore {
-  rpc AppendEvent (stream AppendEventsRequest) returns (AppendEventsResponse) {
 
-  }
+  rpc Append (stream AppendRequest) returns (AppendResponse);
 
-  rpc Events (StreamQuery) returns (stream StreamQueryResult) {
+  // finite
+  rpc Source (SourceRequest) returns (stream SourceResponse);
 
-  }
+  // infinite
+  rpc Stream (StreamRequest) returns (stream StreamResponse);
 }
 
-message AppendEventsRequest {
-  oneof request {
-    ConsistencyCondition condition = 1;
-    TaggedEvent event = 2;
-  }
-}
+// Shared
+// PlainEvent, Raw, NakedEvent, IdentifiableEventPayload
 
-message TaggedEvent {
-  Event event = 1;
-  string type = 2;
-  repeated Tag tag = 3;
+// Event storage engine
+message IdentifiableEventPayload {
+  /* The unique identifier of this event */
+  string identifier = 1;
+
+  reserved 2, 3, 4, 5, 6, 7, 8;
+  /* The Payload of the Event */
+  bytes payload = 9;
 }
 
 message Tag {
@@ -30,27 +31,49 @@ message Tag {
   bytes value = 2;
 }
 
-message Event {
-  /* The unique identifier of this event */
-  string identifier = 1;
-
-  reserved 2, 3, 4, 5, 6, 7, 8;
-  /* The Payload of the Event */
-  bytes payload = 9;
-
+message TypedEventPayload {
+  IdentifiableEventPayload event = 1;
+  string type = 2;
 }
 
-message StreamQueryResult {
-  oneof result {
-    ServerSentEvent event = 1;
-    Position consistency_marker = 2; // always a single value
+message TaggedEventPayload {
+  TypedEventPayload typed_event = 1;
+  repeated Tag tag = 2;
+}
+
+// Appending
+message AppendRequest {
+  oneof request {
+    ConsistencyCondition condition = 1;
+    Event event = 2;
+  }
+
+  message Event {
+    TaggedEventPayload event = 1;
   }
 }
 
-message ServerSentEvent {
-  repeated string filter_key = 1;
-  int64 timestamp = 2;
-  TaggedEvent tagged_event = 3;
+message AppendResponse {
+  Position last_position = 1;
+}
+
+// Sourcing
+message SourceRequest {
+  repeated Criterion criterion = 1;
+}
+
+message SourceResponse {
+  oneof result {
+    // ServetSentEvent, DomainEvent, SourcedEvent, TypedEvent, Item
+    Event event = 1; // plain event, tags, type, timestamp, filterkey
+    Position consistency_marker = 2;
+  }
+
+  message Event {
+    repeated string filter_key = 1;
+    int64 timestamp = 2;
+    TaggedEventPayload tagged_event = 3;
+  }
 }
 
 message ConsistencyCondition {
@@ -68,7 +91,7 @@ message ConsistencyCondition {
     Global Sequence Number of the latest event in the command model
    */
   Position consistency_marker = 1;
-  StreamQuery stream_query = 2;
+  SourceRequest stream_query = 2;
 }
 
 /**
@@ -88,12 +111,8 @@ message Position {
 /**
   Denotes the position before the start of the event stream
  */
-message Seed{
+message Seed {
 
-}
-
-message StreamQuery {
-  repeated Criterion criterion = 1;
 }
 
 message Criterion {
@@ -108,6 +127,18 @@ message TagsAndTypeCriterion {
   repeated Tag tag = 2;
 }
 
-message AppendEventsResponse {
-  Position last_position = 1;
+// Streaming
+
+message StreamRequest {
+  /* The token to start streaming from */
+  int64 tracking_token = 1;
+}
+
+message StreamResponse {
+  int64 tracking_token = 1;
+  Event event = 2;
+
+  message Event {
+    TypedEventPayload typed_event = 1;
+  }
 }
