@@ -130,8 +130,12 @@ message StreamSignal {
   oneof type {
     io.axoniq.axonserver.grpc.event.EventWithToken event = 2; /* an event to process in the client */
     bool closed = 3; /* indicates that the segment is closed by Axon Server */
+    OpenSegment open = 4; /* segment assigned to the client */
   }
-  int64 reset_position = 4;
+}
+
+message OpenSegment {
+  int64 position_at_reset = 1; /* position of stream before reset stream actions */
 }
 
 message ResetStreamConfiguration {
