@@ -29,6 +29,10 @@ service PersistentStreamService {
   rpc ListStreams(ListStreamsRequest) returns (stream StreamStatus) {
 
   }
+
+  rpc ResetStream(ResetStreamRequest) returns (stream google.protobuf.Empty) {
+
+  }
 }
 
 /* request to list the persistent streams for a context */
@@ -72,6 +76,11 @@ message SegmentError {
 /* Request to delete a persistent stream */
 message DeleteStreamRequest {
   string stream_id = 1; /* the unique identification of the stream */
+}
+
+message ResetStreamRequest {
+  string stream_id = 1; /* the unique identification of the stream */
+  ResetStreamConfiguration options = 2;
 }
 
 /* Request to update the properties of a persistent stream */
@@ -122,4 +131,18 @@ message StreamSignal {
     io.axoniq.axonserver.grpc.event.EventWithToken event = 2; /* an event to process in the client */
     bool closed = 3; /* indicates that the segment is closed by Axon Server */
   }
+  int64 reset_position = 4;
+}
+
+message ResetStreamConfiguration {
+  ResetType type = 1;
+  int64 instant = 2;
+  int64 position = 3;
+}
+
+enum ResetType {
+  HEAD = 0;
+  TAIL = 1;
+  DATETIME = 2;
+  POSITION = 3;
 }
