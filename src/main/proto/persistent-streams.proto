@@ -142,15 +142,15 @@ message OpenSegment {
 
 /* Message to provide parameters for resetting a persistent stream */
 message ResetStreamConfiguration {
-  ResetType type = 1; /* the reset type */
-  int64 instant = 2; /* timestamp in epoch milliseconds when ResetType is DATETIME */
-  int64 position = 3; /* global index (inclusive) when ResetType is POSITION */
+  oneof type {
+    google.protobuf.Empty head = 1; /* indicates reset to head */
+    google.protobuf.Empty tail = 2; /* indicates reset to tail */
+    WrappedInt64 datetime = 3; /* timestamp in epoch milliseconds */
+    WrappedInt64 position = 4;  /* global index (inclusive)  */
+  }
 }
 
-/* possible types for resetting a persistent stream */
-enum ResetType {
-  HEAD = 0;  /* reset the persistent stream to the head of the event store */
-  TAIL = 1; /* reset the persistent stream to the first event of the event store */
-  DATETIME = 2; /* reset the persistent stream to the first event at or after a given time */
-  POSITION = 3; /* reset the persistent stream to a specific position in the event store */
+message WrappedInt64 {
+  int64 value = 1;
 }
+
