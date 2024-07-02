@@ -145,12 +145,8 @@ message ResetStreamConfiguration {
   oneof type {
     google.protobuf.Empty head = 1; /* indicates reset to head */
     google.protobuf.Empty tail = 2; /* indicates reset to tail */
-    WrappedInt64 datetime = 3; /* timestamp in epoch milliseconds */
-    WrappedInt64 position = 4;  /* global index (inclusive)  */
+    int64 datetime = 3; /* timestamp in epoch milliseconds */
+    int64 position = 4;  /* global index (inclusive)  */
   }
-}
-
-message WrappedInt64 {
-  int64 value = 1;
 }
 
