@@ -29,6 +29,11 @@ service PersistentStreamService {
   rpc ListStreams(ListStreamsRequest) returns (stream StreamStatus) {
 
   }
+
+  /* Resets the position of a persistent stream. */
+  rpc ResetStream(ResetStreamRequest) returns (stream google.protobuf.Empty) {
+
+  }
 }
 
 /* request to list the persistent streams for a context */
@@ -49,6 +54,7 @@ message SegmentPosition {
   int32 segment = 1; /* the segment number */
   int64 position = 2; /* the last confirmed position */
   string client_id = 3; /* the connected client, empty if there is no client connected to this segment */
+  string error = 4; /* optional error reported by the client for this segment */
 }
 
 /* Request to set up a connection to a stream. Clients should first submit an OpenRequest on this connection
@@ -58,12 +64,24 @@ message StreamRequest {
     Open open = 1; /* the initial message to connect to a stream */
     ProgressAcknowledgement acknowledgeProgress = 2; /* sends progress in processing events to Axon Server */
     Requests requests = 3; /* request a number of messages for a segment */
+    SegmentError error = 4; /* notifies an error */
   }
+}
+
+/* Request to notify Axon Server of an error on a persistent stream segment */
+message SegmentError {
+  int32 segment = 1; /* the segment number */
+  string error = 2; /* the error that occurred while processing the events for this segment */
 }
 
 /* Request to delete a persistent stream */
 message DeleteStreamRequest {
   string stream_id = 1; /* the unique identification of the stream */
+}
+
+message ResetStreamRequest {
+  string stream_id = 1; /* the unique identification of the stream */
+  ResetStreamConfiguration options = 2;
 }
 
 /* Request to update the properties of a persistent stream */
@@ -113,5 +131,22 @@ message StreamSignal {
   oneof type {
     io.axoniq.axonserver.grpc.event.EventWithToken event = 2; /* an event to process in the client */
     bool closed = 3; /* indicates that the segment is closed by Axon Server */
+    OpenSegment open = 4; /* segment assigned to the client */
   }
 }
+
+/* Message to prepare client for events on a specific action */
+message OpenSegment {
+  int64 position_at_reset = 1; /* position of stream before reset stream actions */
+}
+
+/* Message to provide parameters for resetting a persistent stream */
+message ResetStreamConfiguration {
+  oneof type {
+    google.protobuf.Empty head = 1; /* indicates reset to head */
+    google.protobuf.Empty tail = 2; /* indicates reset to tail */
+    int64 datetime = 3; /* timestamp in epoch milliseconds */
+    int64 position = 4;  /* global index (inclusive)  */
+  }
+}
+
