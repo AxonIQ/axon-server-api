@@ -9,6 +9,10 @@ option java_multiple_files = true;
    the context.
  */
 service PersistentStreamService {
+  /* Creates a persistent stream if it does not exist. */
+  rpc CreateStream( CreateStreamRequest) returns (CreateStreamResponse) {
+
+  }
   /* Open a persistent event stream connection from a client. Creates the stream if it does not exist. */
   rpc OpenStream(stream StreamRequest) returns (stream StreamSignal) {
 
@@ -67,6 +71,16 @@ message StreamRequest {
     SegmentError error = 4; /* notifies an error */
   }
 }
+
+message CreateStreamRequest {
+  string stream_id = 1; /* the unique identification of the stream */
+  InitializationProperties initialization_properties = 2; /* properties to create the stream if it does not exist */
+}
+
+message CreateStreamResponse {
+  CreateResult result = 1;
+}
+
 
 /* Request to notify Axon Server of an error on a persistent stream segment */
 message SegmentError {
@@ -150,3 +164,7 @@ message ResetStreamConfiguration {
   }
 }
 
+enum CreateResult {
+  created = 0;
+  already_exists = 1;
+}
