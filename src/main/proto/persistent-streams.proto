@@ -9,6 +9,10 @@ option java_multiple_files = true;
    the context.
  */
 service PersistentStreamService {
+  /* Creates a persistent stream if it does not exist. */
+  rpc CreateStream( CreateStreamRequest) returns (CreateStreamResponse) {
+
+  }
   /* Open a persistent event stream connection from a client. Creates the stream if it does not exist. */
   rpc OpenStream(stream StreamRequest) returns (stream StreamSignal) {
 
@@ -67,6 +71,18 @@ message StreamRequest {
     SegmentError error = 4; /* notifies an error */
   }
 }
+
+/* Request to create a persistent stream */
+message CreateStreamRequest {
+  string stream_id = 1; /* the unique identification of the stream */
+  InitializationProperties initialization_properties = 2; /* properties to create the stream if it does not exist */
+}
+
+/* Response for a create stream request */
+message CreateStreamResponse {
+  CreateResult result = 1; /* the result (created or already existing) */
+}
+
 
 /* Request to notify Axon Server of an error on a persistent stream segment */
 message SegmentError {
@@ -129,15 +145,21 @@ message Requests {
 message StreamSignal {
   int32 segment = 1; /* the segment number */
   oneof type {
-    io.axoniq.axonserver.grpc.event.EventWithToken event = 2; /* an event to process in the client */
+    PersistentStreamEvent event = 2; /* an event to process in the client */
     bool closed = 3; /* indicates that the segment is closed by Axon Server */
     OpenSegment open = 4; /* segment assigned to the client */
   }
 }
 
-/* Message to prepare client for events on a specific action */
+/* Event sent on a persistent stream segment */
+message PersistentStreamEvent {
+  io.axoniq.axonserver.grpc.event.EventWithToken event = 1; /* an event to process in the client */
+  bool replay = 2; /* indicates that the event is sent again after a reset stream */
+}
+
+
+/* Message to prepare client for events on a specific segment */
 message OpenSegment {
-  int64 position_at_reset = 1; /* position of stream before reset stream actions */
 }
 
 /* Message to provide parameters for resetting a persistent stream */
@@ -150,3 +172,8 @@ message ResetStreamConfiguration {
   }
 }
 
+/* result of create stream */
+enum CreateResult {
+  created = 0;
+  already_exists = 1;
+}
