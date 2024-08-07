@@ -43,10 +43,8 @@ message TaggedEventPayload {
 
 // Appending
 message AppendRequest {
-  oneof request {
-    ConsistencyCondition condition = 1;
-    Event event = 2;
-  }
+  ConsistencyCondition condition = 1;
+  Event event = 2;
 
   message Event {
     TaggedEventPayload event = 1;
@@ -59,7 +57,9 @@ message AppendResponse {
 
 // Sourcing
 message SourceRequest {
-  repeated Criterion criterion = 1;
+  int64 from_sequence = 1;
+  int64 to_sequence = 2;
+  repeated Criterion criterion = 3;
 }
 
 message SourceResponse {
@@ -91,39 +91,39 @@ message ConsistencyCondition {
     Global Sequence Number of the latest event in the command model
    */
   Position consistency_marker = 1;
-  SourceRequest source_request = 2;
+  repeated Criterion criterion = 2;
 }
 
 /**
 Marks the position in or before the event stream
 - Either
-  - The `Seed` alt names we thought about: Initial, Origin, Seed, Before, Null, Thingamajig, ∅
+  - The `Head`
   - Global Sequence Number of an event
 May contain shard or tier information as well.
  */
 message Position {
   oneof raw {
     int64 sequence = 1;
-    Seed seed = 2;
+    Head head = 2;
   }
 }
 
 /**
-  Denotes the position before the start of the event stream
+  Denotes the position of the _head_ of the event stream
  */
-message Seed {
+message Head {
 
 }
 
 message Criterion {
   string filter_key = 1;
   oneof criterion {
-    TagsAndTypeCriterion tags_and_types = 2;
+    TagsAndTypesCriterion tags_and_types = 2;
   }
 }
 
-message TagsAndTypeCriterion {
-  string type = 1;
+message TagsAndTypesCriterion {
+  repeated string type = 1;
   repeated Tag tag = 2;
 }
 
@@ -131,7 +131,7 @@ message TagsAndTypeCriterion {
 
 message StreamRequest {
   /* The token to start streaming from */
-  int64 tracking_token = 1;
+  int64 from_sequence = 1;
 }
 
 message StreamResponse {
