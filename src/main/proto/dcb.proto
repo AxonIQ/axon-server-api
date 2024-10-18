@@ -127,6 +127,8 @@ message TagsAndTypesCriterion {
   repeated Tag tag = 2;
 }
 
+// criteria(criterion(type(StudentSubscribed), type(StudentUnsubscribed), studentId(1), course(1)))
+
 // Streaming
 
 message StreamRequest {
