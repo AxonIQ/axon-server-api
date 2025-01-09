@@ -13,6 +13,71 @@ service DcbEventStore {
   rpc Stream (StreamRequest) returns (stream StreamResponse);
 }
 
+service DcbSnapshotStore {
+
+  rpc Put (PutRequest) returns (PutResponse);
+  
+  rpc Add (AddRequest) returns (AddResponse); 
+  
+  rpc Delete (DeleteRequest) returns (DeleteResponse);
+  
+  rpc List (ListRequest) returns (stream ListResponse);
+  
+  rpc GetLast (GetRequest) returns (GetResponse);
+}
+
+message Snapshot {
+  string name = 1;
+  string revision = 2;
+  bytes payload = 3;
+}
+
+message PutRequest {
+  bytes key = 1;
+  int64 sequence = 2;
+  Snapshot snapshot = 3;
+}
+
+message PutResponse {
+  
+}
+
+message AddRequest {
+  bytes key = 1;
+  int64 sequence = 2;
+  Snapshot snapshot = 3;
+}
+
+message AddResponse {
+  
+}
+
+message DeleteRequest {
+  bytes key = 1;
+  // exclusive
+  int64 to_sequence = 2;
+}
+
+message DeleteResponse {
+  
+}
+
+message ListRequest {
+  
+}
+
+message ListResponse {
+  
+}
+
+message GetRequest {
+  
+}
+
+message GetResponse {
+  
+}
+
 // Shared
 // PlainEvent, Raw, NakedEvent, IdentifiableEventPayload
 
@@ -135,7 +200,7 @@ message StreamRequest {
 }
 
 message StreamResponse {
-  int64 tracking_token = 1;
+  int64 sequence = 1;
   Event event = 2;
 
   message Event {
