@@ -15,15 +15,13 @@ service DcbEventStore {
 
 service DcbSnapshotStore {
 
-  rpc Put (PutRequest) returns (PutResponse);
-  
-  rpc Add (AddRequest) returns (AddResponse); 
+  rpc Add (AddRequest) returns (AddResponse);
   
   rpc Delete (DeleteRequest) returns (DeleteResponse);
   
   rpc List (ListRequest) returns (stream ListResponse);
   
-  rpc GetLast (GetRequest) returns (GetResponse);
+  rpc GetLast (GetLastRequest) returns (GetLastResponse);
 }
 
 message Snapshot {
@@ -32,20 +30,11 @@ message Snapshot {
   bytes payload = 3;
 }
 
-message PutRequest {
-  bytes key = 1;
-  int64 sequence = 2;
-  Snapshot snapshot = 3;
-}
-
-message PutResponse {
-  
-}
-
 message AddRequest {
   bytes key = 1;
   int64 sequence = 2;
-  Snapshot snapshot = 3;
+  bool prune = 3;
+  Snapshot snapshot = 4;
 }
 
 message AddResponse {
@@ -54,28 +43,38 @@ message AddResponse {
 
 message DeleteRequest {
   bytes key = 1;
+  // inclusive
+  int64 from_sequence = 2;
   // exclusive
-  int64 to_sequence = 2;
+  int64 to_sequence = 3;
 }
 
 message DeleteResponse {
-  
+  int32 num_of_deleted_snapshots = 1;
 }
 
 message ListRequest {
-  
+  bytes key = 1;
+  // inclusive
+  int64 from_sequence = 2;
+  // exclusive
+  int64 to_sequence = 3;
 }
 
 message ListResponse {
-  
+  bytes key = 1;
+  int64 sequence = 2;
+  Snapshot snapshot = 3;
 }
 
-message GetRequest {
-  
+message GetLastRequest {
+  bytes key = 1;
 }
 
-message GetResponse {
-  
+message GetLastResponse {
+  bytes key = 1;
+  int64 sequence = 2;
+  Snapshot snapshot = 3;
 }
 
 // Shared
