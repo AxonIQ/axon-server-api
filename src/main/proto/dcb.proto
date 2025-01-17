@@ -11,17 +11,49 @@ service DcbEventStore {
 
   // infinite
   rpc Stream (StreamRequest) returns (stream StreamResponse);
+
+  rpc AddTags (AddTagsRequest) returns (AddTagsResponse);
+
+  rpc RemoveTags (RemoveTagsRequest) returns (RemoveTagsResponse);
+
+  rpc GetTags (GetTagsRequest) returns (GetTagsResponse);
 }
 
 service DcbSnapshotStore {
 
   rpc Add (AddRequest) returns (AddResponse);
-  
+
   rpc Delete (DeleteRequest) returns (DeleteResponse);
-  
+
   rpc List (ListRequest) returns (stream ListResponse);
-  
+
   rpc GetLast (GetLastRequest) returns (GetLastResponse);
+}
+
+message AddTagsRequest {
+  int64 sequence = 1;
+  repeated Tag tag = 2;
+}
+
+message AddTagsResponse {
+
+}
+
+message RemoveTagsRequest {
+  int64 sequence = 1;
+  repeated Tag tag = 2;
+}
+
+message RemoveTagsResponse {
+
+}
+
+message GetTagsRequest {
+  int64 sequence = 1;
+}
+
+message GetTagsResponse {
+  repeated Tag tag = 1;
 }
 
 message Snapshot {
