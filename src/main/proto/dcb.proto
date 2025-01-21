@@ -4,13 +4,20 @@ option java_multiple_files = true;
 
 service DcbEventStore {
 
-  rpc Append (stream AppendRequest) returns (AppendResponse);
+  rpc Append (stream AppendEventsRequest) returns (AppendEventsResponse);
 
   // finite
-  rpc Source (SourceRequest) returns (stream SourceResponse);
+  rpc Source (SourceEventsRequest) returns (stream SourceEventsResponse);
 
   // infinite
-  rpc Stream (StreamRequest) returns (stream StreamResponse);
+  rpc Stream (StreamEventsRequest) returns (stream StreamEventsResponse);
+
+  rpc GetHead(GetHeadRequest) returns (GetHeadResponse);
+
+  rpc GetTail(GetTailRequest) returns (GetTailResponse);
+
+  // approximation
+  rpc GetSequenceAt(GetSequenceAtRequest) returns (GetSequenceAtResponse);
 
   rpc AddTags (AddTagsRequest) returns (AddTagsResponse);
 
@@ -21,13 +28,122 @@ service DcbEventStore {
 
 service DcbSnapshotStore {
 
-  rpc Add (AddRequest) returns (AddResponse);
+  rpc Add (AddSnapshotRequest) returns (AddSnapshotResponse);
 
-  rpc Delete (DeleteRequest) returns (DeleteResponse);
+  rpc Delete (DeleteSnapshotsRequest) returns (DeleteSnapshotsResponse);
 
-  rpc List (ListRequest) returns (stream ListResponse);
+  rpc List (ListSnapshotsRequest) returns (stream ListSnapshotsResponse);
 
-  rpc GetLast (GetLastRequest) returns (GetLastResponse);
+  rpc GetLast (GetLastSnapshotRequest) returns (GetLastSnapshotResponse);
+}
+
+message Event {
+  /* The unique identifier of this event */
+  string identifier = 1;
+  int64 timestamp = 2;
+  string name = 3;
+  string version = 4;
+  /* The Payload of the Event */
+  bytes payload = 5;
+  map<string, string> metadata = 6;
+}
+
+message Tag {
+  bytes key = 1;
+  bytes value = 2;
+}
+
+message TaggedEvent {
+  Event event = 1;
+  repeated Tag tag = 2;
+}
+
+message SequencedEvent {
+  int64 sequence = 1;
+  Event event = 2;
+}
+
+// Appending
+message AppendEventsRequest {
+  ConsistencyCondition condition = 1;
+  repeated TaggedEvent event = 2;
+}
+
+message AppendEventsResponse {
+  int64 last_position = 1;
+}
+
+// Sourcing
+message SourceEventsRequest {
+  // inclusive
+  int64 from_sequence = 1;
+  repeated Criterion criterion = 2;
+}
+
+message SourceEventsResponse {
+  oneof result {
+    SequencedEvent event = 1;
+    int64 consistency_marker = 2;
+  }
+}
+
+message ConsistencyCondition {
+  /**
+- The Position to start checking for the consistency of an append
+- Examples
+  - When Consistency marker is n (where n > 0), event with Global Sequence Number n will be checked
+  - When Consistency marker is 0, the first event in the event store (Global Sequence Number = 0) will be checked
+  - When Consistency marker is the `Seed`, the check starts with the very first event (if any) in the event store
+  - When creating a new command model, `Seed` can be used to verify the
+    command model has never been used before.
+    Subsequent appends for this command model **must** use ConsistencyMarker of at least the
+    Global Sequence Number of the latest event in the command model
+   */
+  int64 consistency_marker = 1;
+  repeated Criterion criterion = 2;
+}
+
+message Criterion {
+  TagsAndNamesCriterion tags_and_names = 1;
+}
+
+message TagsAndNamesCriterion {
+  repeated string name = 1;
+  repeated Tag tag = 2;
+}
+
+message StreamEventsRequest {
+  /* The token to start streaming from */
+  int64 from_sequence = 1;
+  repeated Criterion criterion = 2;
+}
+
+message StreamEventsResponse {
+  SequencedEvent event = 1;
+}
+
+message GetHeadRequest {
+
+}
+
+message GetHeadResponse {
+  int64 sequence = 1;
+}
+
+message GetTailRequest {
+
+}
+
+message GetTailResponse {
+  int64 sequence = 1;
+}
+
+message GetSequenceAtRequest {
+  int64 timestamp = 1;
+}
+
+message GetSequenceAtResponse {
+  int64 sequence = 1;
 }
 
 message AddTagsRequest {
@@ -62,18 +178,18 @@ message Snapshot {
   bytes payload = 3;
 }
 
-message AddRequest {
+message AddSnapshotRequest {
   bytes key = 1;
   int64 sequence = 2;
   bool prune = 3;
   Snapshot snapshot = 4;
 }
 
-message AddResponse {
-  
+message AddSnapshotResponse {
+
 }
 
-message DeleteRequest {
+message DeleteSnapshotsRequest {
   bytes key = 1;
   // inclusive
   int64 from_sequence = 2;
@@ -81,11 +197,11 @@ message DeleteRequest {
   int64 to_sequence = 3;
 }
 
-message DeleteResponse {
-  int32 num_of_deleted_snapshots = 1;
+message DeleteSnapshotsResponse {
+
 }
 
-message ListRequest {
+message ListSnapshotsRequest {
   bytes key = 1;
   // inclusive
   int64 from_sequence = 2;
@@ -93,148 +209,18 @@ message ListRequest {
   int64 to_sequence = 3;
 }
 
-message ListResponse {
+message ListSnapshotsResponse {
   bytes key = 1;
   int64 sequence = 2;
   Snapshot snapshot = 3;
 }
 
-message GetLastRequest {
+message GetLastSnapshotRequest {
   bytes key = 1;
 }
 
-message GetLastResponse {
+message GetLastSnapshotResponse {
   bytes key = 1;
   int64 sequence = 2;
   Snapshot snapshot = 3;
-}
-
-// Shared
-// PlainEvent, Raw, NakedEvent, IdentifiableEventPayload
-
-// Event storage engine
-message IdentifiableEventPayload {
-  /* The unique identifier of this event */
-  string identifier = 1;
-
-  reserved 2, 3, 4, 5, 6, 7, 8;
-  /* The Payload of the Event */
-  bytes payload = 9;
-}
-
-message Tag {
-  bytes key = 1;
-  bytes value = 2;
-}
-
-message TypedEventPayload {
-  IdentifiableEventPayload event = 1;
-  string type = 2;
-}
-
-message TaggedEventPayload {
-  TypedEventPayload typed_event = 1;
-  repeated Tag tag = 2;
-}
-
-// Appending
-message AppendRequest {
-  ConsistencyCondition condition = 1;
-  Event event = 2;
-
-  message Event {
-    TaggedEventPayload event = 1;
-  }
-}
-
-message AppendResponse {
-  Position last_position = 1;
-}
-
-// Sourcing
-message SourceRequest {
-  int64 from_sequence = 1;
-  int64 to_sequence = 2;
-  repeated Criterion criterion = 3;
-}
-
-message SourceResponse {
-  oneof result {
-    // ServetSentEvent, DomainEvent, SourcedEvent, TypedEvent, Item
-    Event event = 1; // plain event, tags, type, timestamp, filterkey
-    Position consistency_marker = 2;
-  }
-
-  message Event {
-    repeated string filter_key = 1;
-    int64 timestamp = 2;
-    TaggedEventPayload tagged_event = 3;
-  }
-}
-
-message ConsistencyCondition {
-  /**
-- The Position to start checking for the consistency of an append
-- Examples
-  - When Consistency marker is n (where n > 0), event with Global Sequence Number n will be checked
-  - When Consistency marker is 0, the first event in the event store (Global Sequence Number = 0) will be checked
-  - When Consistency marker is the `Seed`, the check starts with the very first event (if any) in the event store
-  - When creating a new command model, `Seed` can be used to verify the
-    command model has never been used before.
-    Subsequent appends for this command model **must** use ConsistencyMarker of at least the
-    Global Sequence Number of the latest event in the command model
-   */
-  Position consistency_marker = 1;
-  repeated Criterion criterion = 2;
-}
-
-/**
-Marks the position in or before the event stream
-- Either
-  - The `Head`
-  - Global Sequence Number of an event
-May contain shard or tier information as well.
- */
-message Position {
-  oneof raw {
-    int64 sequence = 1;
-    Head head = 2;
-  }
-}
-
-/**
-  Denotes the position of the _head_ of the event stream
- */
-message Head {
-
-}
-
-message Criterion {
-  string filter_key = 1;
-  oneof criterion {
-    TagsAndTypesCriterion tags_and_types = 2;
-  }
-}
-
-message TagsAndTypesCriterion {
-  repeated string type = 1;
-  repeated Tag tag = 2;
-}
-
-// criteria(criterion(type(StudentSubscribed), type(StudentUnsubscribed), studentId(1), course(1)))
-
-// Streaming
-
-message StreamRequest {
-  /* The token to start streaming from */
-  int64 from_sequence = 1;
-}
-
-message StreamResponse {
-  int64 sequence = 1;
-  Event event = 2;
-
-  message Event {
-    TypedEventPayload typed_event = 1;
-  }
 }
