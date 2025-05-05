@@ -70,7 +70,9 @@ message AppendEventsRequest {
 }
 
 message AppendEventsResponse {
-  int64 last_position = 1;
+  int64 sequence_of_the_first_event = 1;
+  int32 transaction_size = 2;
+  int64 consistency_marker = 3;
 }
 
 // Sourcing
