@@ -114,7 +114,7 @@ message AppendEventsRequest {
   ConsistencyCondition condition = 1;
 
   /* A list of tagged events to be appended to the event store if the condition is met.
-  These events are considered as a transaction - they are either all appended or none of them is appended.
+  These events are considered as a transaction - they are either all appended or none of them are appended.
   The event store will index the events based on provided tags for future faster retrieval. */
   repeated TaggedEvent event = 2;
 }
