@@ -133,7 +133,7 @@ message AppendEventsResponse {
   /* The consistency marker which may be used for a subsequent append events requests. Do note that during the time this
   consistency marker may get far behind the head of the event store which will increase the time needed for the append
   events request to be validated. If you don't plan to do subsequent append events requests in a "short" period of time,
-  use Source RPC to refresh the consistency marker. */
+  use the Source RPC to refresh the consistency marker. */
   int64 consistency_marker = 3;
 }
 
