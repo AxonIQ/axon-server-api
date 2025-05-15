@@ -17,7 +17,7 @@ service DcbEventStore {
   /* Gets the current _head_ of the Event Store. The _head_ points to the sequence of the first event to be appended. */
   rpc GetHead (GetHeadRequest) returns (GetHeadResponse);
 
-  /* Gets the current _tail_ of the Event Store. The _tail_ points to a sequence of the first event stored. */
+  /* Gets the current _tail_ of the Event Store. The _tail_ points to the sequence of the first event stored. */
   rpc GetTail (GetTailRequest) returns (GetTailResponse);
 
   /* Gets the sequence of the event whose timestamp approximately matches the given request. It returns the first
