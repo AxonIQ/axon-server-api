@@ -240,7 +240,7 @@ message GetTailResponse {
   int64 sequence = 1;
 }
 
-/* The request to get the sequence of the event whose timestamp the same as the timestamp provided in the request.
+/* The request to get the sequence of the event whose timestamp is the same as the timestamp provided in the request.
 If there are no events with the exact timestamp, then the sequence of the first one after the provided timestamp is
 returned. If the provided timestamp is greater that the sequence of the last event in the event store,
 the HEAD is returned. */
