@@ -20,9 +20,8 @@ service DcbEventStore {
   /* Gets the current _tail_ of the Event Store. The _tail_ points to the sequence of the first event stored. */
   rpc GetTail (GetTailRequest) returns (GetTailResponse);
 
-  /* Gets the sequence of the event whose timestamp approximately matches the given request. It returns the first
-  event whose timestamp is greater or equal than the provided timestamp. If the provided timestamp is after the
-  timestamp of the last event in the event store, the HEAD is returned.
+  /* Returns the lowest sequence of an event with a timestamp equal to or higher than the given timestamp. The HEAD is
+  returned if no events exist with a timestamp equal to or higher than the given timestamp.
 
   N.B. Axon Server does not assign timestamps to events. The timestamps used for fulfilling this RPC are timestamps
   provided by the client. It could happen that there are events after the returned sequence that have an earlier
@@ -279,7 +278,7 @@ message RemoveTagsRequest {
   /* The sequence of the event whose tags should be removed. */
   int64 sequence = 1;
 
-  /* Tags to be removed. */
+  /* Tags to be removed. If the event is not tagged with listed tags, they are skipped. */
   repeated Tag tag = 2;
 }
 
