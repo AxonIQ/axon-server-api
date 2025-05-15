@@ -151,8 +151,7 @@ message SourceEventsRequest {
 }
 
 /* The response to the SourceEventsRequest. It consists either of an event (with its corresponding sequence) or a
-consistency marker. The consistency marker should be used in the following AppendEventsRequest related to the same
-criteria. */
+consistency marker. The consistency marker should be used in a following AppendEventsRequest related to the criteria used in the SourceEventsRequest this response originates from. */
 message SourceEventsResponse {
   oneof result {
 
