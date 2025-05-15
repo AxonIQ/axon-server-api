@@ -14,7 +14,7 @@ service DcbEventStore {
   /* Provides an infinite stream of events based on the passed StreamEventsRequest.  */
   rpc Stream (StreamEventsRequest) returns (stream StreamEventsResponse);
 
-  /* Gets the current _head_ of the Event Store. The _head_ points to a sequence of the first event to be appended. */
+  /* Gets the current _head_ of the Event Store. The _head_ points to the sequence of the first event to be appended. */
   rpc GetHead (GetHeadRequest) returns (GetHeadResponse);
 
   /* Gets the current _tail_ of the Event Store. The _tail_ points to a sequence of the first event stored. */
