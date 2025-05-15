@@ -168,7 +168,7 @@ message SourceEventsResponse {
 message ConsistencyCondition {
 
   /* The sequence used to start checking for the consistency of an append. If there are events with a sequence greater
-  or equal than the consistency marker, and are matching the given criteria the condition is not met and the transaction
+  or equal than the consistency marker and those are matching the given criteria, the condition is not met and the transaction
   is rejected. Otherwise, it is accepted. */
   int64 consistency_marker = 1;
 
