@@ -1,0 +1,401 @@
+syntax = "proto3";
+package io.axoniq.axonserver.grpc.event.dcb;
+option java_multiple_files = true;
+
+/* EXPERIMENTAL: Service providing Event Store RPCs supporting DCB. */
+service DcbEventStore {
+
+  /* Appends new events to the store. */
+  rpc Append (stream AppendEventsRequest) returns (AppendEventsResponse);
+
+  /* Provides a finite stream of events based on the passed SourceEventsRequest. */
+  rpc Source (SourceEventsRequest) returns (stream SourceEventsResponse);
+
+  /* Provides an infinite stream of events based on the passed StreamEventsRequest.  */
+  rpc Stream (StreamEventsRequest) returns (stream StreamEventsResponse);
+
+  /* Gets the current _head_ of the Event Store. The _head_ points to the sequence of the first event to be appended. */
+  rpc GetHead (GetHeadRequest) returns (GetHeadResponse);
+
+  /* Gets the current _tail_ of the Event Store. The _tail_ points to the sequence of the first event stored. */
+  rpc GetTail (GetTailRequest) returns (GetTailResponse);
+
+  /* Returns the lowest sequence of an event with a timestamp equal to or higher than the given timestamp. The HEAD is
+  returned if no events exist with a timestamp equal to or higher than the given timestamp.
+
+  N.B. Axon Server does not assign timestamps to events. The timestamps used for fulfilling this RPC are timestamps
+  provided by the client. It could happen that there are events after the returned sequence that have an earlier
+  timestamp. Axon Server does not reject appends if timestamps of events are not monotonically increasing. */
+  rpc GetSequenceAt (GetSequenceAtRequest) returns (GetSequenceAtResponse);
+
+  /* Assigns tags to the event identified by its sequence. */
+  rpc AddTags (AddTagsRequest) returns (AddTagsResponse);
+
+  /* Removes tags from the event identified by its sequence. */
+  rpc RemoveTags (RemoveTagsRequest) returns (RemoveTagsResponse);
+
+  /* Gets tags for the event identified by its sequence. */
+  rpc GetTags (GetTagsRequest) returns (GetTagsResponse);
+}
+
+/* EXPERIMENTAL: Service providing Snapshot Store RPCs. */
+service DcbSnapshotStore {
+
+  /* Adds a snapshot to the snapshot store. */
+  rpc Add (AddSnapshotRequest) returns (AddSnapshotResponse);
+
+  /* Deletes a snapshot from the snapshot store. */
+  rpc Delete (DeleteSnapshotsRequest) returns (DeleteSnapshotsResponse);
+
+  /* Retrieves snapshots from the snapshot store. */
+  rpc List (ListSnapshotsRequest) returns (stream ListSnapshotsResponse);
+
+  /* Gets the latest snapshot based on the request from the snapshot store. */
+  rpc GetLast (GetLastSnapshotRequest) returns (GetLastSnapshotResponse);
+}
+
+/* The event message. */
+message Event {
+
+  /* The unique identifier of the event. */
+  string identifier = 1;
+
+  /* The timestamp of the event. */
+  int64 timestamp = 2;
+
+  /* The name of the event. */
+  string name = 3;
+
+  /* The version of the event. */
+  string version = 4;
+
+  /* The payload of the event. */
+  bytes payload = 5;
+
+  /* The metadata of the event. */
+  map<string, string> metadata = 6;
+}
+
+/* The tag. Describes an event with more details. Usually using concepts from the Domain. */
+message Tag {
+
+  /* The key of the tag. */
+  bytes key = 1;
+
+  /* The value of the tag. */
+  bytes value = 2;
+}
+
+/* The event described in more details by a list of tags. */
+message TaggedEvent {
+
+  /* The event. */
+  Event event = 1;
+
+  /* List of tags describing the given event in more details. */
+  repeated Tag tag = 2;
+}
+
+/* The event retrieved from the event store with its corresponding sequence. */
+message SequencedEvent {
+
+  /* The sequence of the event. */
+  int64 sequence = 1;
+
+  /* The event. */
+  Event event = 2;
+}
+
+/* The message representing the request to append events to the event store. */
+message AppendEventsRequest {
+
+  /* The condition used to check the validity of this request. If omitted, events will be appended unconditionally. */
+  ConsistencyCondition condition = 1;
+
+  /* A list of tagged events to be appended to the event store if the condition is met.
+  These events are considered as a transaction - they are either all appended or none of them are appended.
+  The event store will index the events based on provided tags for future faster retrieval. */
+  repeated TaggedEvent event = 2;
+}
+
+/* The response of a successful append events request. If there was an issue with the append events request,
+the stream will complete with an error. */
+message AppendEventsResponse {
+
+  /* The sequence of the first event stored in the event store.
+  Corresponding to the list of events (a transaction) passed in the AppendEventsRequest. */
+  int64 sequence_of_the_first_event = 1;
+
+  /* The number of events appended. Matches the number of events passed in the AppendEventsRequest. */
+  int32 transaction_size = 2;
+
+  /* The consistency marker which may be used for a subsequent append events requests. Do note that during the time this
+  consistency marker may get far behind the head of the event store which will increase the time needed for the append
+  events request to be validated. If you don't plan to do subsequent append events requests in a "short" period of time,
+  use the Source RPC to refresh the consistency marker. */
+  int64 consistency_marker = 3;
+}
+
+/* The request to source events from the event store. It results in a finite stream of events completed by
+the event store. It may also be cancelled by the client. Only events matching the given criteria
+(a provided list of criterions) will be present in the stream. The stream is capped by the HEAD of the event store. */
+message SourceEventsRequest {
+
+  /* An inclusive sequence of the first event to be included in the resulting stream. */
+  int64 from_sequence = 1;
+
+  /* The criteria consisting of the list of criterions. If at least one of these criterions is met,
+  the criteria is met. */
+  repeated Criterion criterion = 2;
+}
+
+/* The response to the SourceEventsRequest. It consists either of an event (with its corresponding sequence) or a
+consistency marker. The consistency marker should be used in a following AppendEventsRequest related to the criteria used in the SourceEventsRequest this response originates from. */
+message SourceEventsResponse {
+  oneof result {
+
+    /* The event matching the criteria with its corresponding sequence. */
+    SequencedEvent event = 1;
+
+    /* The consistency marker to be used for the following append related to the same criteria. */
+    int64 consistency_marker = 2;
+  }
+}
+
+/* The condition for an AppendEventsRequest. Consists of the consistency marker and the criteria
+(a list of criterions). */
+message ConsistencyCondition {
+
+  /* The sequence used to start checking for the consistency of an append. If there are events with a sequence greater
+  or equal than the consistency marker and those are matching the given criteria, the condition is not met and the transaction
+  is rejected. Otherwise, it is accepted. */
+  int64 consistency_marker = 1;
+
+  /* The criteria. Consists of a list of criterions. If a single criterion is met, the whole criteria is met. */
+  repeated Criterion criterion = 2;
+}
+
+/* The integral part of the criteria. */
+message Criterion {
+
+  /* The criterion based on event tags and event names. */
+  TagsAndNamesCriterion tags_and_names = 1;
+}
+
+/* The criterion based on event tags and event names. The event meets this criterion if ALL tags from this criterion
+are present in the tags of the event AND if the event name is present in one of the names of the this criterion. */
+message TagsAndNamesCriterion {
+
+  /* A list of event names. The event meets this criterion if its name is in one of the names in this list. */
+  repeated string name = 1;
+
+  /* A list of event tags. The event meets this criterion if it contains all the tags from this list. It meets the
+  criterion if it contains more than provided list here, but it MUST contain all from the list. */
+  repeated Tag tag = 2;
+}
+
+/* The request to provide an infinite stream of events from the event store. The client may cancel the stream at any
+time. */
+message StreamEventsRequest {
+
+  /* The inclusive sequence to start streaming from. */
+  int64 from_sequence = 1;
+
+  /* The criteria used to filter out events. Represented by a list of criterions. If at least one is met, the whole
+  criteria is met. */
+  repeated Criterion criterion = 2;
+}
+
+/* The response to the StreamEventsRequest. */
+message StreamEventsResponse {
+
+  /* The event with its corresponding sequence. */
+  SequencedEvent event = 1;
+}
+
+/* The request to retrieve the current HEAD of the event store. */
+message GetHeadRequest {
+
+}
+
+/* The current HEAD of the event store. */
+message GetHeadResponse {
+
+  /* The sequence of the current head. Points to the position of the first event to be appended. The HEAD of an empty
+  event store is 0. */
+  int64 sequence = 1;
+}
+
+/* The request to retrieve the current TAIL of the event store. */
+message GetTailRequest {
+
+}
+
+/* The current TAIL of the event store. */
+message GetTailResponse {
+
+  /* The sequence of the first event in the event store. 0 for an empty event store. 0 for a non-truncated event store.
+  Non-zero for a truncated event store. */
+  int64 sequence = 1;
+}
+
+/* The request to get the sequence of the event whose timestamp is the same as the timestamp provided in the request.
+If there are no events with the exact timestamp, then the sequence of the first one after the provided timestamp is
+returned. If the provided timestamp is greater that the sequence of the last event in the event store,
+the HEAD is returned. */
+message GetSequenceAtRequest {
+
+  /* The timestamp. */
+  int64 timestamp = 1;
+}
+
+/* The sequence of the event approximately close to the provided timestamp. */
+message GetSequenceAtResponse {
+
+  /* The sequence of the event. */
+  int64 sequence = 1;
+}
+
+/* The request to add tags to the event. */
+message AddTagsRequest {
+
+  /* The sequence of the event whose tags list will be expanded with the tags from the request. */
+  int64 sequence = 1;
+
+  /* The tags to be added to the event. If the event already contains a tag from the same list
+  (with the same key and the value) the new one will be ignored. */
+  repeated Tag tag = 2;
+}
+
+/* The response indicating a successful addition of tags to the event. */
+message AddTagsResponse {
+
+}
+
+/* The request to remove tags from the event. */
+message RemoveTagsRequest {
+
+  /* The sequence of the event whose tags should be removed. */
+  int64 sequence = 1;
+
+  /* Tags to be removed. If the event is not tagged with listed tags, they are skipped. */
+  repeated Tag tag = 2;
+}
+
+/* The response indicating a successful removal of tags for the event. */
+message RemoveTagsResponse {
+
+}
+
+/* The request to retrieve tags of the event. */
+message GetTagsRequest {
+
+  /* The sequence of the event whose tags should be retrieved. */
+  int64 sequence = 1;
+}
+
+/* The response containing tags of an event. */
+message GetTagsResponse {
+
+  /* The tags associated to the event. */
+  repeated Tag tag = 1;
+}
+
+/* The snapshot. */
+message Snapshot {
+
+  /* The name of the snapshot. */
+  string name = 1;
+
+  /* The revision of the snapshot. */
+  string revision = 2;
+
+  /* The payload of the snapshot. */
+  bytes payload = 3;
+}
+
+/* The request to add the snapshot to the snapshot store. */
+message AddSnapshotRequest {
+
+  /* The key this snapshot is added to. */
+  bytes key = 1;
+
+  /* The sequence of the snapshot. Usually linked to the sequence of the event in the event store up to which
+  the snapshot is taken. */
+  int64 sequence = 2;
+
+  /* If set to true, older snapshots for the same key are pruned. */
+  bool prune = 3;
+
+  /* The snapshot. */
+  Snapshot snapshot = 4;
+}
+
+/* The response indicating the successful addition of the snapshot. */
+message AddSnapshotResponse {
+
+}
+
+/* The request to delete the snapshot from the snapshot store. */
+message DeleteSnapshotsRequest {
+
+  /* The key the snapshot is identified by. */
+  bytes key = 1;
+
+  /* The inclusive bottom bound sequence of the snapshot to start the deletion. */
+  int64 from_sequence = 2;
+
+  /* The exclusive upper bound sequence of the snapshot to end the deletion. */
+  int64 to_sequence = 3;
+}
+
+/* The response indicating the successful deletion of the snapshot. */
+message DeleteSnapshotsResponse {
+
+}
+
+/* The request to retrieve all snapshots from the snapshot store based on the key and sequence bounds. */
+message ListSnapshotsRequest {
+
+  /* The key of the snapshot. */
+  bytes key = 1;
+
+  /* The inclusive bottom bound sequence used to filter out snapshots. */
+  int64 from_sequence = 2;
+
+  /* The exclusive upper bound sequence used to filter out snapshots. */
+  int64 to_sequence = 3;
+}
+
+/* The response to the ListSnapshotRequest. */
+message ListSnapshotsResponse {
+
+  /* The key of the snapshot. */
+  bytes key = 1;
+
+  /* The sequence of the snapshot. */
+  int64 sequence = 2;
+
+  /* The snapshot. */
+  Snapshot snapshot = 3;
+}
+
+/* The request to retrieve the snapshot with the highest sequence from the snapshot store. */
+message GetLastSnapshotRequest {
+
+  /* The key of the snapshot. */
+  bytes key = 1;
+}
+
+/* The response to GetLatestSnapshotRequest. */
+message GetLastSnapshotResponse {
+
+  /* The key of the snapshot. */
+  bytes key = 1;
+
+  /* The sequence of the snapshot. */
+  int64 sequence = 2;
+
+  /* The snapshot. */
+  Snapshot snapshot = 3;
+}

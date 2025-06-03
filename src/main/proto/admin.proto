@@ -44,6 +44,7 @@ message CreateContextRequest {
   string name = 1;
   string replicationGroupName = 2;
   map<string, string> meta_data = 3;
+  bool dcbContext = 4;
 }
 
 message UpdateContextPropertiesRequest {
@@ -66,6 +67,7 @@ message ContextOverview {
   map<string, string> meta_data = 3;
   int64 pendingSince = 4;
   bool changePending = 5;
+  bool dcbContext = 6;
 }
 
 message ContextUpdate {
