@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v1.4.3
         with:
           java-version: 11
-          server-id: sonatype
+          server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
