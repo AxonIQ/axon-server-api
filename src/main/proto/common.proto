@@ -2,6 +2,7 @@ syntax = "proto3";
 package io.axoniq.axonserver.grpc;
 import "google/protobuf/any.proto";
 option java_multiple_files = true;
+option csharp_namespace = "AxonIQ.AxonServer.Grpc";
 
 /* Describes a serialized object */
 message SerializedObject {
