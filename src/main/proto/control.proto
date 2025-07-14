@@ -47,14 +47,19 @@ message PlatformInboundInstruction {
         /* Subscribe to topology changes in the AxonServer cluster.
            This allows the client to receive updates about changes in the cluster, such as handler additions or removals.
          */
-        RequestTopologyChanges request_topology_changes = 7;
+        SubscribeTopologyChanges subscribe_topology_changes = 7;
+
+        UnsubscribeTopologyChanges unsubscribe_topology_changes = 8;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
     string instruction_id = 5;
 }
 
-message RequestTopologyChanges {
+message SubscribeTopologyChanges {
+}
+
+message UnsubscribeTopologyChanges {
 }
 
 /* An instruction or information from the AxonServer Platform to the Application Node */
