@@ -43,10 +43,26 @@ message PlatformInboundInstruction {
 
         /* The result of the execution of an instruction */
         InstructionResult result = 6;
+
+        /* Subscribe to topology changes in the AxonServer cluster.
+           This allows the client to receive updates about changes in the cluster, such as handler additions or removals.
+         */
+        SubscribeTopologyChanges subscribe_topology_changes = 7;
+
+        /* Unsubscribe from topology changes in the AxonServer cluster. */
+        UnsubscribeTopologyChanges unsubscribe_topology_changes = 8;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via outbound stream */
     string instruction_id = 5;
+}
+
+/* Message to subscribe to topology changes within the control channel's context */
+message SubscribeTopologyChanges {
+}
+
+/* Message to unsubscribe from topology changes within the control channel's context */
+message UnsubscribeTopologyChanges {
 }
 
 /* An instruction or information from the AxonServer Platform to the Application Node */
@@ -87,6 +103,11 @@ message PlatformOutboundInstruction {
 
         /* Acknowledgement of previously sent instruction via inbound stream */
         InstructionAck ack = 11;
+
+        /* Notification of a change in the topology of the AxonServer cluster.
+           This is used to inform clients about changes in the cluster, such as handler additions or removals.
+         */
+        TopologyChange topology_change = 13;
     }
 
     /* Instruction identifier. If this identifier is set, this instruction will be acknowledged via inbound stream */
@@ -223,4 +244,33 @@ message EventProcessorSegmentReference {
 }
 
 message Heartbeat {
+}
+
+message TopologyChange {
+    UpdateType update_type  = 1;
+    string context = 2;
+    string client_id = 3; // The client ID of the component requesting the update
+    string client_stream_id = 4; // The client ID of the component requesting the update
+    string component_name = 5; // The name of the component requesting the update
+    oneof subscription {
+        CommandSubscription command = 6; // The subscription ID to add or remove
+        QuerySubscription query = 7; // The processor name to add or remove
+    }
+}
+
+message CommandSubscription {
+    string name = 1; // The subscription ID to add or remove
+    int32 load_factor = 2; // The load factor for the subscription
+}
+
+message QuerySubscription {
+    string name = 1; // The subscription ID to add or remove
+}
+
+enum UpdateType {
+    ADD_COMMAND_HANDLER = 0; // a new command handler has been added
+    REMOVE_COMMAND_HANDLER = 1; // a command handler has been removed
+    ADD_QUERY_HANDLER = 2; // a new query handler has been added
+    REMOVE_QUERY_HANDLER = 3; // a query handler has been removed
+    RESET_ALL = 4; // reset all information in the client, new information will be sent
 }
