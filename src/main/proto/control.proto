@@ -49,6 +49,7 @@ message PlatformInboundInstruction {
          */
         SubscribeTopologyChanges subscribe_topology_changes = 7;
 
+        /* Unsubscribe from topology changes in the AxonServer cluster. */
         UnsubscribeTopologyChanges unsubscribe_topology_changes = 8;
     }
 
@@ -56,9 +57,11 @@ message PlatformInboundInstruction {
     string instruction_id = 5;
 }
 
+/* Message to subscribe to topology changes within the control channel's context */
 message SubscribeTopologyChanges {
 }
 
+/* Message to unsubscribe from topology changes within the control channel's context */
 message UnsubscribeTopologyChanges {
 }
 
