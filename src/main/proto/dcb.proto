@@ -307,11 +307,17 @@ message Snapshot {
   /* The name of the snapshot. */
   string name = 1;
 
-  /* The revision of the snapshot. */
-  string revision = 2;
+  /* The version of the snapshot. */
+  string version = 2;
 
   /* The payload of the snapshot. */
   bytes payload = 3;
+
+  /* The timestamp of the snapshot. */
+  int64 timestamp = 4;
+
+  /* The metadata of the snapshot. */
+  map<string, string> metadata = 5;
 }
 
 /* The request to add the snapshot to the snapshot store. */
