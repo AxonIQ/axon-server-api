@@ -1,5 +1,6 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.event.dcb;
+import "common.proto";
 option java_multiple_files = true;
 
 /* EXPERIMENTAL: Service providing Event Store RPCs supporting DCB. */
@@ -53,6 +54,50 @@ service DcbSnapshotStore {
   /* Gets the latest snapshot based on the request from the snapshot store. */
   rpc GetLast (GetLastSnapshotRequest) returns (GetLastSnapshotResponse);
 }
+
+/* EXPERIMENTAL: Service to use AxonServer as a provider of an EventScheduler */
+service DcbEventScheduler {
+  //  Schedule the given event for publication at the given time}. The returned ScheduleToken can be used to reschedule or cancel the planned publication.
+  rpc ScheduleEvent (ScheduleEventRequest) returns (ScheduleToken) {
+  }
+  //  Reschedule a scheduled event and optionally replace it by a new event.
+  rpc RescheduleEvent (RescheduleEventRequest) returns (ScheduleToken) {
+  }
+  //  Cancel the publication of a scheduled event. If the events has already been published, this method does nothing.
+  rpc CancelScheduledEvent (CancelScheduledEventRequest) returns (InstructionAck) {
+  }
+}
+
+/* Request message to schedule an event */
+message ScheduleEventRequest {
+  /* timestamp when to publish the event */
+  int64 instant = 1;
+  /* the event to publish */
+  Event event = 2;
+}
+
+/* Request message to reschedule an event */
+message RescheduleEventRequest {
+  /* schedule token of the event to reschedule */
+  string token = 1;
+  /* timestamp when to publish the event */
+  int64 instant = 2;
+  /* optionally provide a new event to publish */
+  Event event = 3;
+}
+
+/* Request message to cancel an event */
+message CancelScheduledEventRequest {
+  /* token of scheduled event to cancel */
+  string token = 1;
+}
+
+/* Token to manage a scheduled event */
+message ScheduleToken {
+  /* Field defining the token identifier */
+  string token = 1;
+}
+
 
 /* The event message. */
 message Event {
