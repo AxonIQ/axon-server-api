@@ -2,6 +2,7 @@ syntax = "proto3";
 package io.axoniq.axonserver.grpc.control;
 import "common.proto";
 option java_multiple_files = true;
+option csharp_namespace = "AxonIQ.AxonServer.Grpc.Control";
 
 /* Service describing operations for connecting to the AxonServer platform.
 
