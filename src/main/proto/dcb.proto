@@ -342,15 +342,16 @@ message AddSnapshotResponse {
 
 }
 
-/* The request to delete the snapshot from the snapshot store. */
+/*
+  The request to delete the snapshot from the snapshot store.
+  Deletes from a sequence of `0` to the specified `to_sequence`
+ */
 message DeleteSnapshotsRequest {
 
   /* The key the snapshot is identified by. */
   bytes key = 1;
 
-  /* The inclusive bottom bound sequence of the snapshot to start the deletion. */
-  int64 from_sequence = 2;
-
+  reserved  2;
   /* The exclusive upper bound sequence of the snapshot to end the deletion. */
   int64 to_sequence = 3;
 }
