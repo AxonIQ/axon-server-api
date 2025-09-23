@@ -121,7 +121,7 @@ message QueryRequest {
     /* Meta Data providing contextual information of the Query */
     map<string, MetaDataValue> meta_data = 5;
 
-    /* An object describing the expectations of the Response Type */
+    /* An object describing the expectations of the Response Type, no longer used in Axon Framework 5 */
     SerializedObject response_type = 6;
 
     /* Any instructions for components Routing or Handling the Query */
@@ -132,6 +132,9 @@ message QueryRequest {
 
     /* The Name of the Component dispatching the query */
     string component_name = 9;
+
+    /* the name of the response the query expects */
+    string response_name = 10;
 }
 
 /* Message that represents the Response to a Query */
