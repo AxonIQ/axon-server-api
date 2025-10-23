@@ -121,6 +121,7 @@ enum Role {
   ROLE_PASSIVE_BACKUP = 3;
   ROLE_MESSAGING_ONLY = 4;
   ROLE_SECONDARY = 5;
+  ROLE_ANALYTICS = 6;
 }
 
 message GetReplicationGroupRequest {
