@@ -133,8 +133,6 @@ message QueryRequest {
     /* The Name of the Component dispatching the query */
     string component_name = 9;
 
-    /* the name of the response the query expects */
-    string response_name = 10;
 }
 
 /* Message that represents the Response to a Query */
@@ -248,8 +246,10 @@ message SubscriptionQueryRequest {
 
         /* Requests the initial result of a subscription query to be sent. This should always be done after opening the
            subscription query itself, to remove concurrency conflicts with Update messages.
+
+           Note that this request is deprecated. It is recommended to retrieve the initial request using a regular query.
          */
-        SubscriptionQuery get_initial_result = 3;
+      SubscriptionQuery get_initial_result = 3 [deprecated = true];
 
         /* Allows the Server to provide additional Updates to be sent. Only the `number_of_permits` field needs to be
            set on this message.
