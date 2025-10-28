@@ -121,8 +121,8 @@ message QueryRequest {
     /* Meta Data providing contextual information of the Query */
     map<string, MetaDataValue> meta_data = 5;
 
-    /* An object describing the expectations of the Response Type, no longer used in Axon Framework 5 */
-    SerializedObject response_type = 6;
+    /* An object describing the expectations of the Response Type. Deprecated. no longer used in Axon Framework 5 */
+    SerializedObject response_type = 6 [deprecated = true];
 
     /* Any instructions for components Routing or Handling the Query */
     repeated ProcessingInstruction processing_instructions = 7;
@@ -174,8 +174,8 @@ message SubscriptionQuery {
     /* The Query describing the desire for information */
     QueryRequest query_request = 3;
 
-    /* A description of the type of Object expected as Update Responses */
-    SerializedObject update_response_type = 4;
+    /* A description of the type of Object expected as Update Responses. Deprecated: queries don't need to provide expected response types */
+    SerializedObject update_response_type = 4 [deprecated = true];
 }
 
 /* A message containing an Update of a Query Subscription Response */
@@ -249,7 +249,7 @@ message SubscriptionQueryRequest {
 
            Note that this request is deprecated. It is recommended to retrieve the initial request using a regular query.
          */
-      SubscriptionQuery get_initial_result = 3 [deprecated = true];
+        SubscriptionQuery get_initial_result = 3 [deprecated = true];
 
         /* Allows the Server to provide additional Updates to be sent. Only the `number_of_permits` field needs to be
            set on this message.
