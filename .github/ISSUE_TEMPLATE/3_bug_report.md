@@ -1,6 +1,6 @@
 ---
 name: 'Bug report'
-about: 'Report a bug in Axon Server'
+about: 'Report a bug in the Axon Server API'
 title:
 type: 'Bug'
 ---

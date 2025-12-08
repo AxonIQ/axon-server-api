@@ -1,6 +1,6 @@
 ---
 name: 'Feature request'
-about: 'Suggest a feature for Axon Server'
+about: 'Suggest a feature for the Axon Server API'
 title:
 type: 'Feature'
 ---
@@ -16,11 +16,11 @@ type: 'Feature'
 
 ### Current Behaviour
 
-<!-- Please share the current behaviour of Axon Server around this topic, if applicable. -->
+<!-- Please share the current behaviour of the Axon Server API around this topic, if applicable. -->
 
 ### Wanted Behaviour
 
-<!-- Please describe the desired outcome through Axon Server around the suggested feature. -->
+<!-- Please describe the desired outcome through the Axon Server API around the suggested feature. -->
 
 ### Possible Workarounds
 

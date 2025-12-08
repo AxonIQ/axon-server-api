@@ -1,10 +1,10 @@
 <!--
-Thanks for taking the time to draft up an issue for Axon Server!
+Thanks for taking the time to draft up an issue for the Axon Server API!
 Prior to starting off, please read the following:
 
 ## Usage Questions
 
-If you are having difficulty using Axon Server,
+If you are having difficulty using the Axon Server API,
  please consider checking Axoniq Docs first if it answers your question: https://https://docs.axoniq.io/home/
  
 When the documentation does not cover the specific question you have, take the following into account:

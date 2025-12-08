@@ -1,6 +1,6 @@
 ---
 name: 'Enhancement request'
-about: 'Suggest an enhancement/change to an existing feature for Axon Server'
+about: 'Suggest an enhancement/change to an existing feature for the Axon Server API'
 title:
 type: 'Enhancement'
 ---
@@ -13,11 +13,11 @@ type: 'Enhancement'
 
 ### Current Behaviour
 
-<!-- Please share the current behaviour of Axon Server around this topic, if applicable. -->
+<!-- Please share the current behaviour of the Axon Server API around this topic, if applicable. -->
 
 ### Wanted Behaviour
 
-<!-- Please describe the desired outcome through Axon Server around the suggested enhancement. -->
+<!-- Please describe the desired outcome through the Axon Server API around the suggested enhancement. -->
 
 ### Possible Workarounds
 
