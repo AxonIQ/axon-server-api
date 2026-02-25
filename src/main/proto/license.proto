@@ -1,0 +1,24 @@
+syntax = "proto3";
+package io.axoniq.axonserver.grpc.license;
+option java_multiple_files = true;
+
+service LicenseService {
+
+    rpc GetLicense (GetLicenseRequest) returns (GetLicenseResponse);
+
+    rpc SubscribeLicenseUpdates (GetLicenseRequest) returns (stream GetLicenseResponse);
+
+}
+
+message GetLicenseRequest {
+}
+
+message GetLicenseResponse {
+    string license_content = 1;
+    LicenseStatus status = 2;
+}
+
+enum LicenseStatus {
+    AVAILABLE = 0;
+    UNAVAILABLE = 1;
+}
