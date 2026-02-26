@@ -1,0 +1,26 @@
+syntax = "proto3";
+package io.axoniq.axonserver.grpc.license;
+option java_multiple_files = true;
+
+// Service for retrieving Axon Server license information.
+service LicenseService {
+
+    // Retrieves the current license details.
+    rpc GetLicense (GetLicenseRequest) returns (GetLicenseResponse);
+
+    // Opens a server-streaming subscription that emits the current license
+    // followed by updates whenever the license changes.
+    rpc SubscribeLicenseUpdates (GetLicenseRequest) returns (stream GetLicenseResponse);
+
+}
+
+// Request message for license operations.
+message GetLicenseRequest {
+}
+
+// Response message containing the license information.
+message GetLicenseResponse {
+
+    // The full license content as a string.
+    string license_content = 1;
+}
