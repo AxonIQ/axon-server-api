@@ -15,10 +15,4 @@ message GetLicenseRequest {
 
 message GetLicenseResponse {
     string license_content = 1;
-    LicenseStatus status = 2;
-}
-
-enum LicenseStatus {
-    AVAILABLE = 0;
-    UNAVAILABLE = 1;
 }
