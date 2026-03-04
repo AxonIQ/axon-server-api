@@ -8,10 +8,6 @@ service LicenseService {
     // Retrieves the current license details.
     rpc GetLicense (GetLicenseRequest) returns (GetLicenseResponse);
 
-    // Opens a server-streaming subscription that emits the current license
-    // followed by updates whenever the license changes.
-    rpc SubscribeLicenseUpdates (GetLicenseRequest) returns (stream GetLicenseResponse);
-
 }
 
 // Request message for license operations.
