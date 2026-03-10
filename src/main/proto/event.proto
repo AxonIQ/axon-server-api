@@ -8,7 +8,7 @@ option java_multiple_files = true;
 service EventStore {
 
     // Accepts a stream of Events returning a Confirmation when completed.
-    rpc AppendEvent (stream Event) returns (Confirmation) {
+    rpc AppendEvent (stream Event) returns (ConfirmationWithConsistencyMarker) {
     }
 
     // Accepts a Snapshot event returning a Confirmation when completed.
@@ -337,6 +337,24 @@ message Confirmation {
 
     /* True when successful, otherwise false */
     bool success = 1;
+}
+
+/*
+A confirmation to a request from the client, including an optional consistency marker to track the position of this confirmation in the Event Stream.
+The consistency_marker is only set for AppendEvent requests towards a DCB context.
+ */
+message ConfirmationWithConsistencyMarker {
+
+    /* True when successful, otherwise false */
+    bool success = 1;
+    /* The consistency marker token */
+    ConsistencyMarker consistency_marker = 2;
+}
+
+/* A marker to track the position of a Confirmation in the Event Stream, used for consistency tracking in DCB contexts */
+message ConsistencyMarker {
+    /* The token representing the position of this marker in the Stream */
+    int64 token = 1;
 }
 
 /* Request describing the desire to read events for a specific Aggregate */
