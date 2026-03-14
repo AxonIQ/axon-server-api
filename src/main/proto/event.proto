@@ -3,6 +3,7 @@ package io.axoniq.axonserver.grpc.event;
 import "common.proto";
 import "google/protobuf/empty.proto";
 option java_multiple_files = true;
+option csharp_namespace = "AxonIQ.AxonServer.Grpc.Event";
 
 /* Service providing operations against the EventStore functionality of Axon Server */
 service EventStore {
