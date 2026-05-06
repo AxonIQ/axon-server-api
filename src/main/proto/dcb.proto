@@ -55,6 +55,16 @@ service DcbSnapshotStore {
   rpc GetLast (GetLastSnapshotRequest) returns (GetLastSnapshotResponse);
 }
 
+/* Service providing Event Store RPCs supporting DCB combined with snapshots. */
+service SnapshottedDcbEventStore {
+
+  /* Provides a finite stream of events based on the passed SnapshottedSourceRequest, optionally preceded by the
+  latest snapshot stored under the given snapshot key. When a snapshot is present, the stream starts with that snapshot
+  followed by the events with a sequence greater than the snapshot's sequence; otherwise, it behaves like a regular
+  Source RPC starting from the beginning. */
+  rpc Source (SnapshottedSourceRequest) returns (stream SnapshottedSourceEventsResponse);
+}
+
 /* Service to use AxonServer as a provider of an EventScheduler */
 service DcbEventScheduler {
   //  Schedule the given event for publication at the given time}. The returned ScheduleToken can be used to reschedule or cancel the planned publication.
@@ -194,6 +204,22 @@ message SourceEventsRequest {
   repeated Criterion criterion = 2;
 }
 
+/* The request to source events from the event store, prefixed by the latest matching snapshot if available.
+It results in a finite stream completed by the event store. It may also be cancelled by the client. Only events
+matching the given criteria (a provided list of criterions) will be present in the stream. The stream is capped by
+the HEAD of the event store. */
+message SnapshottedSourceRequest {
+
+  /* The key used to look up the latest snapshot in the snapshot store. If a snapshot exists for this key, it is
+  emitted as the first response and events are sourced starting from the sequence following that snapshot. If no
+  snapshot exists, events are sourced from the beginning. */
+  bytes snapshot_key = 1;
+
+  /* The criteria consisting of the list of criterions. If at least one of these criterions is met,
+  the criteria is met. */
+  repeated Criterion criterion = 2;
+}
+
 /* The response to the SourceEventsRequest. It consists either of an event (with its corresponding sequence) or a
 consistency marker. The consistency marker should be used in a following AppendEventsRequest related to the criteria used in the SourceEventsRequest this response originates from. */
 message SourceEventsResponse {
@@ -204,6 +230,25 @@ message SourceEventsResponse {
 
     /* The consistency marker to be used for the following append related to the same criteria. */
     int64 consistency_marker = 2;
+  }
+}
+
+/* The response to the SnapshottedSourceRequest. It consists either of a snapshot (emitted at most once at the
+beginning of the stream), an event (with its corresponding sequence), or a consistency marker. The consistency
+marker should be used in a following AppendEventsRequest related to the criteria used in the SnapshottedSourceRequest
+this response originates from. */
+message SnapshottedSourceEventsResponse {
+  oneof result {
+
+    /* The latest snapshot stored under the snapshot key from the request. When present, it is emitted as the first
+    message of the stream and is followed by events with a sequence greater than the snapshot's sequence. */
+    Snapshot snapshot = 1;
+
+    /* The event matching the criteria with its corresponding sequence. */
+    SequencedEvent event = 2;
+
+    /* The consistency marker to be used for the following append related to the same criteria. */
+    int64 consistency_marker = 3;
   }
 }
 
