@@ -212,7 +212,11 @@ message SnapshottedSourceRequest {
 
   /* The key used to look up the latest snapshot in the snapshot store. If a snapshot exists for this key, it is
   emitted as the first response and events are sourced starting from the sequence following that snapshot. If no
-  snapshot exists, events are sourced from the beginning. */
+  snapshot exists, events are sourced from the beginning.
+
+  The server does not validate any relationship between the snapshot key and the provided criteria. It is the
+  caller's responsibility to ensure the snapshot key and criteria refer to the same entity, so that the snapshot
+  represents a state that can be correctly evolved by applying the sourced events. */
   bytes snapshot_key = 1;
 
   /* The criteria consisting of the list of criterions. If at least one of these criterions is met,
