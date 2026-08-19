@@ -1,6 +1,7 @@
 syntax = "proto3";
 package io.axoniq.axonserver.grpc;
 option java_multiple_files = true;
+option csharp_namespace = "AxonIQ.AxonServer.Grpc";
 
 /* Describes a serialized object */
 message SerializedObject {

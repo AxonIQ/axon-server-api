@@ -4,6 +4,7 @@ import "google/protobuf/empty.proto";
 import "common.proto";
 import "control.proto";
 option java_multiple_files = true;
+option csharp_namespace = "AxonIQ.AxonServer.Grpc.Admin";
 
 //************************ ContextAdminService *****************************
 service ContextAdminService {
