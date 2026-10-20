@@ -1,16 +1,35 @@
 version: 2
 updates:
-  - package-ecosystem: maven
+  - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
+      day: "sunday"
     open-pull-requests-limit: 5
-    # Specify labels for pull requests
     labels:
       - "Type: Dependency Upgrade"
       - "Priority 1: Must"
-      - "Status: In Progress"
-    # Add reviewers
-    reviewers:
-      - "MGathier"
-    milestone: 7
+    milestone: 11
+    groups:
+      github-dependencies:
+        update-types:
+          - "patch"
+          - "minor"
+          - "major"
+
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: "sunday"
+    open-pull-requests-limit: 5
+    labels:
+      - "Type: Dependency Upgrade"
+      - "Priority 1: Must"
+    milestone: 11
+    groups:
+      maven-dependencies:
+        update-types:
+          - "patch"
+          - "minor"
+          - "major"
