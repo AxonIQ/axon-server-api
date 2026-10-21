@@ -155,6 +155,19 @@ message NodeInfo {
 
     /* The unique name of the node to connect with, for purpose of debugging */
     string node_name = 5;
+
+    /* The capabilities supported by this node. Absent on nodes that predate capability negotiation; clients should
+       not treat that as "no capabilities supported", only as "unknown". */
+    Capabilities capabilities = 6;
+}
+
+/* Message listing the capabilities supported by a Node, used to let a client know in advance whether a given
+   optional RPC or RPC behavior is available, without first having to call it and observe a failure. */
+message Capabilities {
+
+    /* The identifiers of the capabilities supported by the Node. Each identifier is a colon-separated sequence of
+       lowercase segments, e.g. "dcb:snapshot-aware-sourcing". */
+    repeated string capability = 1;
 }
 
 /* Message containing details about the Client Application */
