@@ -218,14 +218,18 @@ matching the given criteria (a provided list of criterions) will be present in t
 the HEAD of the event store. */
 message SnapshottedSourceRequest {
 
-  /* The key used to look up the latest snapshot in the snapshot store. If a snapshot exists for this key, it is
-  emitted as the first response and events are sourced starting from the sequence following that snapshot. If no
-  snapshot exists, events are sourced from the beginning.
+  /* The candidate keys to look up the latest snapshot under, tried strictly in the given order - the server looks
+  up the first key, and only if no snapshot is found under it does it try the next, and so on. This is not a
+  parallel/fan-out lookup. The first snapshot found (under whichever key) is emitted as the first response, and
+  events are sourced starting at that snapshot's own position, inclusive. If no snapshot is found under any key,
+  events are sourced from the beginning.
 
-  The server does not validate any relationship between the snapshot key and the provided criteria. It is the
-  caller's responsibility to ensure the snapshot key and criteria refer to the same entity, so that the snapshot
-  represents a state that can be correctly evolved by applying the sourced events. */
-  bytes snapshot_key = 1;
+  Multiple keys exist to let a caller look up a snapshot that may have been stored under a previous naming scheme
+  (e.g. after an entity type was renamed) without a separate round trip per candidate. The server does not validate
+  any relationship between a snapshot key and the provided criteria. It is the caller's responsibility to ensure a
+  snapshot key and the criteria refer to the same entity, so that the snapshot represents a state that can be
+  correctly evolved by applying the sourced events. */
+  repeated bytes snapshot_key = 1;
 
   /* The criteria consisting of the list of criterions. If at least one of these criterions is met,
   the criteria is met. */
@@ -252,8 +256,10 @@ this response originates from. */
 message SnapshottedSourceEventsResponse {
   oneof result {
 
-    /* The latest snapshot stored under the snapshot key from the request. When present, it is emitted as the first
-    message of the stream and is followed by events with a sequence greater than the snapshot's sequence. */
+    /* Legacy snapshot shape, kept only for the pre-capability-negotiation version of this RPC and never populated
+    by a node that advertises dcb:snapshot-aware-sourcing - such a node always uses sequenced_snapshot (field 4)
+    instead, which also carries the key the snapshot was actually found under and its sequence. A caller that has
+    confirmed the capability should not need to handle this field at all. */
     Snapshot snapshot = 1;
 
     /* The event matching the criteria with its corresponding sequence. */
@@ -261,7 +267,28 @@ message SnapshottedSourceEventsResponse {
 
     /* The consistency marker to be used for the following append related to the same criteria. */
     int64 consistency_marker = 3;
+
+    /* The latest snapshot found under one of the candidate snapshot keys from the request, together with the key
+    it was actually found under and the sequence it was taken at. When present, it is emitted as the first message
+    of the stream and is followed by events with a sequence greater than the snapshot's sequence. Used instead of
+    the legacy snapshot field (1) by any node advertising dcb:snapshot-aware-sourcing. */
+    SequencedSnapshot sequenced_snapshot = 4;
   }
+}
+
+/* A snapshot found while handling a SnapshottedSourceRequest, together with the key it was actually found under
+(one of the request's candidate keys) and the sequence it was taken at - letting the caller use the sequence
+directly instead of deriving it from the following event's sequence. */
+message SequencedSnapshot {
+
+  /* The key the snapshot was found under. */
+  bytes key = 1;
+
+  /* The sequence the snapshot was taken at. */
+  int64 sequence = 2;
+
+  /* The snapshot itself. */
+  Snapshot snapshot = 3;
 }
 
 /* The condition for an AppendEventsRequest. Consists of the consistency marker and the criteria
@@ -492,8 +519,11 @@ message ListSnapshotsResponse {
 /* The request to retrieve the snapshot with the highest sequence from the snapshot store. */
 message GetLastSnapshotRequest {
 
-  /* The key of the snapshot. */
-  bytes key = 1;
+  /* The candidate keys to look up the snapshot under, tried strictly in the given order - the server looks up the
+  first key, and only if no snapshot is found under it does it try the next, and so on. This is not a
+  parallel/fan-out lookup. Multiple keys exist to let a caller look up a snapshot that may have been stored under a
+  previous naming scheme (e.g. after an entity type was renamed) without a separate round trip per candidate. */
+  repeated bytes key = 1;
 }
 
 /* The response to GetLatestSnapshotRequest. */
