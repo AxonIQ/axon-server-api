@@ -133,9 +133,21 @@ message PlatformInfo {
     NodeInfo primary = 1;
 
     /* Flag indicating that the connection may be reused to connect. When true, the client _may_ reuse the connection
-       established for the GetPlatformServer request for subsequent requests.
+       established for the GetPlatformServer request for subsequent requests. When false the client is being
+       redirected to the different node described by primary.
      */
     bool same_connection = 2;
+
+    /* The capabilities of the node that answered this request.
+
+       This always describes the answering node and never the node named by primary, so it is populated whether or
+       not the response redirects the client elsewhere. A client that follows a redirect must ask the node it is
+       sent to for its own capabilities. A client that decides to stay - for instance after following redirects for
+       longer than it is willing to - already holds the capabilities of the node it is connected to.
+
+       Absent only on nodes that predate capability negotiation, which means "unknown", never "none".
+     */
+    Capabilities capabilities = 3;
 }
 
 /* Message containing connection information for an AxonServer Node */
@@ -155,10 +167,6 @@ message NodeInfo {
 
     /* The unique name of the node to connect with, for purpose of debugging */
     string node_name = 5;
-
-    /* The capabilities supported by this node. Absent on nodes that predate capability negotiation; clients should
-       not treat that as "no capabilities supported", only as "unknown". */
-    Capabilities capabilities = 6;
 }
 
 /* Message listing the capabilities supported by a Node, used to let a client know in advance whether a given
