@@ -47,7 +47,15 @@ service DcbEventStore {
   rpc GetTags (GetTagsRequest) returns (GetTagsResponse);
 }
 
-/* Service providing Snapshot Store RPCs. */
+/* Service providing Snapshot Store RPCs.
+
+Storage treats a snapshot's sequence as an opaque ordering key: it must increase monotonically per key, and it is
+the value GetLast maximises and the value List and Delete range over. Nothing about how a snapshot is written or
+ordered relates it to the event store.
+
+Any further meaning is imposed by the RPC that reads the snapshot; see AddSnapshotRequest.sequence. Add, GetLast,
+List and Delete report sequences exactly as stored, while FindLast may normalise one it reports - which changes
+what the caller is told, never what is held. */
 service DcbSnapshotStore {
 
   /* Adds a snapshot to the snapshot store. */
@@ -61,16 +69,42 @@ service DcbSnapshotStore {
 
   /* Gets the latest snapshot based on the request from the snapshot store. */
   rpc GetLast (GetLastSnapshotRequest) returns (GetLastSnapshotResponse);
+
+  /* Gets the latest snapshot stored under the first of several candidate keys that yields one, optionally falling
+  back to the snapshot Axon Framework 4 stored for a given aggregate identifier.
+
+  Unlike GetLast, this RPC normalises what it returns: a snapshot found through the legacy fallback is reported
+  with its sequence translated into the convention described by AddSnapshotRequest.sequence, and flagged as such.
+  Storage itself is unaffected - nothing about how snapshots are written or ordered changes.
+
+  Only a node advertising dcb:snapshot-aware-sourcing provides this RPC. */
+  rpc FindLast (FindLastSnapshotRequest) returns (FindLastSnapshotResponse);
 }
 
 /* Service providing Event Store RPCs supporting DCB combined with snapshots. */
 service SnapshottedDcbEventStore {
 
-  /* Provides a finite stream of events based on the passed SnapshottedSourceRequest, optionally preceded by the
-  latest snapshot stored under the given snapshot key. When a snapshot is present, the stream starts with that snapshot
-  followed by the events with a sequence greater than the snapshot's sequence; otherwise, it behaves like a regular
-  Source RPC starting from the beginning. */
-  rpc Source (SnapshottedSourceRequest) returns (stream SnapshottedSourceEventsResponse);
+  /* Deprecated, superseded by SourceWithSnapshot. Nodes no longer implement this RPC and answer it with
+  UNIMPLEMENTED; a caller must fall back to a separate DcbSnapshotStore.GetLast followed by DcbEventStore.Source,
+  or move to SourceWithSnapshot.
+
+  It is retained here only to document the method path, and is frozen in the shape it was released in. It resumed
+  sourcing at the snapshot's sequence plus one, skipping any event at that sequence, which is why it could not be
+  evolved in place: correcting it would have silently changed results for existing callers. */
+  rpc Source (SnapshottedSourceRequest) returns (stream SnapshottedSourceEventsResponse) {
+    option deprecated = true;
+  }
+
+  /* Provides a finite stream of events based on the passed SourceWithSnapshotRequest, optionally preceded by the
+  latest snapshot stored under one of the given snapshot keys. When a snapshot is present, the stream starts with
+  that snapshot followed by the events with a sequence greater than or equal to the snapshot's sequence; otherwise,
+  it behaves like a regular Source RPC starting from the beginning.
+
+  This RPC requires snapshots written with the convention described by AddSnapshotRequest.sequence. A snapshot
+  written under any other convention yields a stream that re-delivers or omits events.
+
+  Only a node advertising dcb:snapshot-aware-sourcing provides this RPC. */
+  rpc SourceWithSnapshot (SourceWithSnapshotRequest) returns (stream SourceWithSnapshotResponse);
 }
 
 /* Service to use AxonServer as a provider of an EventScheduler */
@@ -212,11 +246,10 @@ message SourceEventsRequest {
   repeated Criterion criterion = 2;
 }
 
-/* The request to source events from the event store, prefixed by the latest matching snapshot if available.
-It results in a finite stream completed by the event store. It may also be cancelled by the client. Only events
-matching the given criteria (a provided list of criterions) will be present in the stream. The stream is capped by
-the HEAD of the event store. */
+/* Deprecated, see SnapshottedDcbEventStore.Source. The request of the superseded Source RPC, frozen in the shape
+it was released in. Use SourceWithSnapshotRequest instead. */
 message SnapshottedSourceRequest {
+  option deprecated = true;
 
   /* The key used to look up the latest snapshot in the snapshot store. If a snapshot exists for this key, it is
   emitted as the first response and events are sourced starting from the sequence following that snapshot. If no
@@ -232,6 +265,47 @@ message SnapshottedSourceRequest {
   repeated Criterion criterion = 2;
 }
 
+/* The request to source events from the event store, prefixed by the latest matching snapshot if available.
+It results in a finite stream completed by the event store. It may also be cancelled by the client. Only events
+matching the given criteria (a provided list of criterions) will be present in the stream. The stream is capped by
+the HEAD of the event store. */
+message SourceWithSnapshotRequest {
+
+  /* The candidate keys to look up the latest snapshot under, tried strictly in the given order - the server looks
+  up the first key, and only if no snapshot is found under it does it try the next, and so on. This is not a
+  parallel/fan-out lookup. The first snapshot found (under whichever key) is emitted as the first response, and
+  events are sourced starting at that snapshot's own sequence, inclusive. If no snapshot is found under any key, or
+  if no key is given at all, events are sourced from the beginning.
+
+  Multiple keys exist to let a caller look up a snapshot that may have been stored under a previous naming scheme
+  (e.g. after an entity type was renamed) without a separate round trip per candidate. The server does not validate
+  any relationship between a snapshot key and the provided criteria. It is the caller's responsibility to ensure a
+  snapshot key and the criteria refer to the same entity, so that the snapshot represents a state that can be
+  correctly evolved by applying the sourced events. */
+  repeated bytes snapshot_key = 1;
+
+  /* The criteria consisting of the list of criterions. If at least one of these criterions is met,
+  the criteria is met. */
+  repeated Criterion criterion = 2;
+
+  /* When set, and no snapshot was found under any snapshot_key, the server additionally looks for the snapshot
+  Axon Framework 4 stored for this aggregate identifier, under AF4's own key convention. Leave unset to disable
+  that lookup entirely.
+
+  AF4 records a snapshot's sequence as the sequence of the last event it includes, rather than as the completeness
+  watermark described by AddSnapshotRequest.sequence. A snapshot found this way is reported with its sequence
+  already translated into the watermark convention, so the caller handles it exactly like any other and sourcing
+  resumes at it inclusively.
+
+  Only the key and the sequence are normalised. The snapshot's name is an AF4 payload type rather than a
+  qualified name, and its version is an AF4 payload revision which is frequently empty - a caller must map both
+  itself, and can detect that it needs to by SequencedSnapshot.from_legacy_identifier.
+
+  Transitional: intended only for a context migrated from an aggregate-based context, and expected to be removed
+  once Axon Framework 4 is no longer in use. */
+  string legacy_aggregate_identifier = 3;
+}
+
 /* The response to the SourceEventsRequest. It consists either of an event (with its corresponding sequence) or a
 consistency marker. The consistency marker should be used in a following AppendEventsRequest related to the criteria used in the SourceEventsRequest this response originates from. */
 message SourceEventsResponse {
@@ -245,11 +319,11 @@ message SourceEventsResponse {
   }
 }
 
-/* The response to the SnapshottedSourceRequest. It consists either of a snapshot (emitted at most once at the
-beginning of the stream), an event (with its corresponding sequence), or a consistency marker. The consistency
-marker should be used in a following AppendEventsRequest related to the criteria used in the SnapshottedSourceRequest
-this response originates from. */
+/* Deprecated, see SnapshottedDcbEventStore.Source. The response of the superseded Source RPC, frozen in the shape
+it was released in. Use SourceWithSnapshotResponse instead. */
 message SnapshottedSourceEventsResponse {
+  option deprecated = true;
+
   oneof result {
 
     /* The latest snapshot stored under the snapshot key from the request. When present, it is emitted as the first
@@ -262,6 +336,48 @@ message SnapshottedSourceEventsResponse {
     /* The consistency marker to be used for the following append related to the same criteria. */
     int64 consistency_marker = 3;
   }
+}
+
+/* The response to the SourceWithSnapshotRequest. It consists either of a snapshot (emitted at most once, as the
+first message of the stream), an event (with its corresponding sequence), or a consistency marker. The consistency
+marker should be used in a following AppendEventsRequest related to the criteria used in the
+SourceWithSnapshotRequest this response originates from. */
+message SourceWithSnapshotResponse {
+  oneof result {
+
+    /* The latest snapshot found under one of the candidate snapshot keys from the request, together with the key
+    it was actually found under and its sequence. When present, it is emitted as the first message of the stream
+    and is followed by events with a sequence greater than or equal to the snapshot's sequence. */
+    SequencedSnapshot snapshot = 1;
+
+    /* The event matching the criteria with its corresponding sequence. */
+    SequencedEvent event = 2;
+
+    /* The consistency marker to be used for the following append related to the same criteria. */
+    int64 consistency_marker = 3;
+  }
+}
+
+/* A snapshot found while handling a SourceWithSnapshotRequest or a FindLastSnapshotRequest, together with the key
+it was actually found under and its sequence - letting the caller use the sequence directly rather than deriving
+it, and letting it tell which of its candidates matched. */
+message SequencedSnapshot {
+
+  /* The key the snapshot was found under. */
+  bytes key = 1;
+
+  /* The sequence this snapshot was stored with, always in the convention described by AddSnapshotRequest.sequence.
+  When from_legacy_identifier is set this is a translated value rather than the one on disk. */
+  int64 sequence = 2;
+
+  /* The snapshot itself. */
+  Snapshot snapshot = 3;
+
+  /* True when this snapshot was found through the request's legacy_aggregate_identifier rather than under one of
+  the keys it asked for, meaning its name is an Axon Framework 4 payload type and its version an AF4 payload
+  revision, which the caller has to map itself. Never inferred from the key: a caller must branch on this field
+  rather than on whether it recognises the key it got back. */
+  bool from_legacy_identifier = 4;
 }
 
 /* The condition for an AppendEventsRequest. Consists of the consistency marker and the criteria
@@ -428,8 +544,21 @@ message AddSnapshotRequest {
   /* The key this snapshot is added to. */
   bytes key = 1;
 
-  /* The sequence of the snapshot. Usually linked to the sequence of the event in the event store up to which
-  the snapshot is taken. */
+  /* The ordering key of this snapshot within its key. It must be greater than the sequence of any snapshot already
+  stored under the same key.
+
+  The store assigns no further meaning to this value. A writer whose snapshots are to be read back through
+  SnapshottedDcbEventStore.Source must set it to a sequence such that the snapshotted state reflects every matching
+  event with a sequence below it; sourcing then resumes at that sequence, inclusive.
+
+  This is a completeness watermark, not a reference to any particular event. It need not be adjacent to the last
+  event included in the snapshot, and usually is not: any sequence satisfying the above is valid, so a snapshot of
+  a rarely-changing entity in a busy store will normally sit far beyond its own last event. Two snapshots holding
+  identical state may therefore legitimately carry different sequences.
+
+  The consistency marker returned when sourcing the state being snapshotted, with the same criteria, is such a
+  value by construction, and is the recommended choice. Writers not using that RPC are recommended to follow the
+  same convention, so their snapshots remain usable by it. */
   int64 sequence = 2;
 
   /* If set to true, older snapshots for the same key are pruned. */
@@ -482,7 +611,7 @@ message ListSnapshotsResponse {
   /* The key of the snapshot. */
   bytes key = 1;
 
-  /* The sequence of the snapshot. */
+  /* The sequence this snapshot was stored with. See AddSnapshotRequest.sequence. */
   int64 sequence = 2;
 
   /* The snapshot. */
@@ -502,9 +631,39 @@ message GetLastSnapshotResponse {
   /* The key of the snapshot. */
   bytes key = 1;
 
-  /* The sequence of the snapshot. */
+  /* The sequence this snapshot was stored with. See AddSnapshotRequest.sequence. */
   int64 sequence = 2;
 
   /* The snapshot. */
   Snapshot snapshot = 3;
+}
+
+/* The request to retrieve the snapshot with the highest sequence stored under any of several candidate keys. */
+message FindLastSnapshotRequest {
+
+  /* The candidate keys to look up the snapshot under, tried strictly in the given order - the server looks up the
+  first key, and only if no snapshot is found under it does it try the next, and so on. This is not a
+  parallel/fan-out lookup. Multiple keys exist to let a caller look up a snapshot that may have been stored under a
+  previous naming scheme (e.g. after an entity type was renamed) without a separate round trip per candidate. */
+  repeated bytes key = 1;
+
+  /* When set, and no snapshot was found under any key, the server additionally looks for the snapshot Axon
+  Framework 4 stored for this aggregate identifier, under AF4's own key convention. Leave unset to disable that
+  lookup entirely.
+
+  Behaves exactly as SourceWithSnapshotRequest.legacy_aggregate_identifier: the sequence is reported already
+  translated into the convention described by AddSnapshotRequest.sequence, while the snapshot's name and version
+  remain AF4 shaped and have to be mapped by the caller, which can detect the need to by
+  SequencedSnapshot.from_legacy_identifier.
+
+  Transitional: intended only for a context migrated from an aggregate-based context, and expected to be removed
+  once Axon Framework 4 is no longer in use. */
+  string legacy_aggregate_identifier = 2;
+}
+
+/* The response to the FindLastSnapshotRequest. */
+message FindLastSnapshotResponse {
+
+  /* The snapshot that was found, together with the key it was found under and its sequence. */
+  SequencedSnapshot snapshot = 1;
 }
