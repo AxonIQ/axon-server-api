@@ -3,7 +3,7 @@ name: Axon Server API
 on:
   push:
     branches:
-      - master
+      - main
       - axon-server-api-*.*.x
       - feature/dcb
   workflow_dispatch:
