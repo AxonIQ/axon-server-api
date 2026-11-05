@@ -70,8 +70,8 @@ service DcbSnapshotStore {
   /* Gets the latest snapshot based on the request from the snapshot store. */
   rpc GetLast (GetLastSnapshotRequest) returns (GetLastSnapshotResponse);
 
-  /* Gets the latest snapshot stored under the first of several candidate keys that yields one, optionally falling
-  back to the snapshot Axon Framework 4 stored for a given aggregate identifier.
+  /* Gets the latest snapshot stored under the first of several candidates that yields an acceptable-version match,
+  optionally falling back to the snapshot Axon Framework 4 stored for a given aggregate identifier.
 
   Unlike GetLast, this RPC normalises what it returns: a snapshot found through the legacy fallback is reported
   with its sequence translated into the convention described by AddSnapshotRequest.sequence, and flagged as such.
@@ -271,24 +271,26 @@ matching the given criteria (a provided list of criterions) will be present in t
 the HEAD of the event store. */
 message SourceWithSnapshotRequest {
 
-  /* The candidate keys to look up the latest snapshot under, tried strictly in the given order - the server looks
-  up the first key, and only if no snapshot is found under it does it try the next, and so on. This is not a
-  parallel/fan-out lookup. The first snapshot found (under whichever key) is emitted as the first response, and
-  events are sourced starting at that snapshot's own sequence, inclusive. If no snapshot is found under any key, or
-  if no key is given at all, events are sourced from the beginning.
+  /* The candidates to look up the latest snapshot under, tried strictly in the given order - the server exhausts
+  all entries under a candidate's key looking for one whose version is in its acceptable_version set before moving
+  to the next candidate. This is not a parallel/fan-out lookup, and a later candidate is never preferred over an
+  earlier one, even if the earlier one's match is a less-preferred version. The first snapshot found is emitted as
+  the first response, and events are sourced starting at that snapshot's own sequence, inclusive. If no snapshot is
+  found under any candidate, or if no candidate is given at all, events are sourced from the beginning.
 
-  Multiple keys exist to let a caller look up a snapshot that may have been stored under a previous naming scheme
-  (e.g. after an entity type was renamed) without a separate round trip per candidate. The server does not validate
-  any relationship between a snapshot key and the provided criteria. It is the caller's responsibility to ensure a
-  snapshot key and the criteria refer to the same entity, so that the snapshot represents a state that can be
-  correctly evolved by applying the sourced events. */
-  repeated bytes snapshot_key = 1;
+  Multiple candidates exist to let a caller look up a snapshot that may have been stored under a previous naming
+  scheme (e.g. after an entity type was renamed), or in a previous payload version it can still make use of (e.g.
+  by upcasting), without a separate round trip per candidate. The server does not validate any relationship between
+  a candidate's key and the provided criteria. It is the caller's responsibility to ensure a snapshot key and the
+  criteria refer to the same entity, so that the snapshot represents a state that can be correctly evolved by
+  applying the sourced events. */
+  repeated SnapshotCandidate candidate = 1;
 
   /* The criteria consisting of the list of criterions. If at least one of these criterions is met,
   the criteria is met. */
   repeated Criterion criterion = 2;
 
-  /* When set, and no snapshot was found under any snapshot_key, the server additionally looks for the snapshot
+  /* When set, and no snapshot was found under any candidate, the server additionally looks for the snapshot
   Axon Framework 4 stored for this aggregate identifier, under AF4's own key convention. Leave unset to disable
   that lookup entirely.
 
@@ -638,16 +640,43 @@ message GetLastSnapshotResponse {
   Snapshot snapshot = 3;
 }
 
+/* A candidate key to look up a snapshot under, together with the snapshot versions acceptable under that key -
+used by FindLastSnapshotRequest and SourceWithSnapshotRequest to let a caller express an upcasting chain: several
+candidates it can use, ordered from least to most upcasting required, where a given name's versions may change
+across the chain as well as its key (e.g. after a rename).
+
+acceptable_version is matched as an unordered set, never searched for a "best" match: the server returns the
+first entry it finds under this key (walking backward from the highest sequence) whose version is anywhere in the
+set, not whichever of several coexisting matches ranks highest in the set. A caller that genuinely needs a
+specific one of several coexisting versions to win must not rely on this list's order - pruning a key down to a
+single live entry achieves that instead. Only once every entry under this key has been checked with no match does
+the server move on to the next candidate.
+
+Leave acceptable_version empty to accept any version - the server then simply returns the entry with the highest
+sequence under this key, exactly as GetLast does. */
+message SnapshotCandidate {
+
+  /* The key to look up the snapshot under. */
+  bytes key = 1;
+
+  /* The snapshot versions acceptable under this key. See the message documentation for how this set is matched. */
+  repeated string acceptable_version = 2;
+}
+
 /* The request to retrieve the snapshot with the highest sequence stored under any of several candidate keys. */
 message FindLastSnapshotRequest {
 
-  /* The candidate keys to look up the snapshot under, tried strictly in the given order - the server looks up the
-  first key, and only if no snapshot is found under it does it try the next, and so on. This is not a
-  parallel/fan-out lookup. Multiple keys exist to let a caller look up a snapshot that may have been stored under a
-  previous naming scheme (e.g. after an entity type was renamed) without a separate round trip per candidate. */
-  repeated bytes key = 1;
+  /* The candidates to look up the snapshot under, tried strictly in the given order - the server exhausts all
+  entries under a candidate's key looking for one whose version is in its acceptable_version set before moving to
+  the next candidate. This is not a parallel/fan-out lookup, and a later candidate is never preferred over an
+  earlier one, even if the earlier one's match is a less-preferred version.
 
-  /* When set, and no snapshot was found under any key, the server additionally looks for the snapshot Axon
+  Multiple candidates exist to let a caller look up a snapshot that may have been stored under a previous naming
+  scheme (e.g. after an entity type was renamed), or in a previous payload version it can still make use of (e.g.
+  by upcasting), without a separate round trip per candidate. */
+  repeated SnapshotCandidate candidate = 1;
+
+  /* When set, and no snapshot was found under any candidate, the server additionally looks for the snapshot Axon
   Framework 4 stored for this aggregate identifier, under AF4's own key convention. Leave unset to disable that
   lookup entirely.
 
