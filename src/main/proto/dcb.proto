@@ -550,8 +550,8 @@ message AddSnapshotRequest {
   stored under the same key.
 
   The store assigns no further meaning to this value. A writer whose snapshots are to be read back through
-  SnapshottedDcbEventStore.Source must set it to a sequence such that the snapshotted state reflects every matching
-  event with a sequence below it; sourcing then resumes at that sequence, inclusive.
+  SnapshottedDcbEventStore.SourceWithSnapshot must set it to a sequence such that the snapshotted state reflects
+  every matching event with a sequence below it; sourcing then resumes at that sequence, inclusive.
 
   This is a completeness watermark, not a reference to any particular event. It need not be adjacent to the last
   event included in the snapshot, and usually is not: any sequence satisfying the above is valid, so a snapshot of
