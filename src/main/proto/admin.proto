@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2018-2026. Axoniq B.V.
+ *
+ * Licensed under the Axoniq Terms of Service (the "Terms"). You may not
+ * use this file except in compliance with the Terms, available at
+ * https://www.axoniq.io/legal/terms-of-service
+ */
+
 syntax = "proto3";
 package io.axoniq.axonserver.grpc.admin;
 import "google/protobuf/empty.proto";
