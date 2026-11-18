@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - axon-server-api-*.*.x
-      - feature/dcb
+      - feature/dcb-event-transformation
   workflow_dispatch:
 
 jobs:
