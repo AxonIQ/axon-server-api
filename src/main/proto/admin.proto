@@ -22,6 +22,8 @@ service ContextAdminService {
 
   rpc DeleteContext(DeleteContextRequest) returns (stream google.protobuf.Empty) ;
 
+  rpc SetContextState(SetContextStateRequest) returns (stream google.protobuf.Empty) ;
+
   rpc GetContext(GetContextRequest) returns (ContextOverview) ;
 
   rpc GetContexts(google.protobuf.Empty) returns (stream ContextOverview) ;
@@ -69,6 +71,17 @@ message GetContextRequest {
   string name = 1;
 }
 
+enum ContextState {
+  NORMAL = 0;
+  READ_ONLY = 1;
+  LOCKED = 2;
+}
+
+message SetContextStateRequest {
+  string name = 1;
+  ContextState state = 2;
+}
+
 message ContextOverview {
   string name = 1;
   ReplicationGroupOverview replicationGroup = 2;
@@ -76,6 +89,7 @@ message ContextOverview {
   int64 pendingSince = 4;
   bool changePending = 5;
   bool dcbContext = 6;
+  ContextState state = 7;
 }
 
 message ContextUpdate {
