@@ -173,7 +173,21 @@ message Event {
   map<string, string> metadata = 6;
 }
 
-/* The tag. Describes an event with more details. Usually using concepts from the Domain. */
+/* The tag. Describes an event with more details. Usually using concepts from the Domain.
+
+Events appended to a DCB context through the aggregate-based event store API (as Axon Framework 4 does) are tagged
+by Axon Server, so DCB clients can source them, and so both kinds of client can work on the same aggregates. An
+event belonging to an aggregate gets two tags, both with the aggregate identifier as value:
+- the aggregate type as key, for example "BankAccount"
+- "AGGREGATE_ID" as key
+Keys and values are the UTF-8 encoding of those strings. An event without an aggregate type gets no tags.
+
+The aggregate-based API reads an aggregate's events by the "AGGREGATE_ID" tag alone, and checks its appends for
+conflicts against the aggregate type tag alone. So a DCB client appending events for such an aggregate tags them
+with both: the aggregate type tag makes the aggregate-based API detect them as conflicting appends, and the
+"AGGREGATE_ID" tag makes it read them as the aggregate's events. Such an event is reported to the aggregate-based
+API with its name as payload type, its version as payload revision, and its sequence in the context as aggregate
+sequence number. */
 message Tag {
 
   /* The key of the tag. */
