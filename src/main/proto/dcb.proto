@@ -290,22 +290,10 @@ message SourceWithSnapshotRequest {
   the criteria is met. */
   repeated Criterion criterion = 2;
 
-  /* When set, and no snapshot was found under any candidate, the server additionally looks for the snapshot
-  Axon Framework 4 stored for this aggregate identifier, under AF4's own key convention. Leave unset to disable
-  that lookup entirely.
-
-  AF4 records a snapshot's sequence as the sequence of the last event it includes, rather than as the completeness
-  watermark described by AddSnapshotRequest.sequence. A snapshot found this way is reported with its sequence
-  already translated into the watermark convention, so the caller handles it exactly like any other and sourcing
-  resumes at it inclusively.
-
-  Only the key and the sequence are normalised. The snapshot's name is an AF4 payload type rather than a
-  qualified name, and its version is an AF4 payload revision which is frequently empty - a caller must map both
-  itself, and can detect that it needs to by SequencedSnapshot.from_legacy_identifier.
-
-  Transitional: intended only for a context migrated from an aggregate-based context, and expected to be removed
-  once Axon Framework 4 is no longer in use. */
-  string legacy_aggregate_identifier = 3;
+  /* When set, and no snapshot was found under any candidate, the server additionally looks for a snapshot Axon
+  Framework 4 stored for an aggregate, as described by LegacySnapshotCandidate. Leave unset to disable that lookup
+  entirely. */
+  LegacySnapshotCandidate legacy_candidate = 3;
 }
 
 /* The response to the SourceEventsRequest. It consists either of an event (with its corresponding sequence) or a
@@ -375,10 +363,10 @@ message SequencedSnapshot {
   /* The snapshot itself. */
   Snapshot snapshot = 3;
 
-  /* True when this snapshot was found through the request's legacy_aggregate_identifier rather than under one of
-  the keys it asked for, meaning its name is an Axon Framework 4 payload type and its version an AF4 payload
-  revision, which the caller has to map itself. Never inferred from the key: a caller must branch on this field
-  rather than on whether it recognises the key it got back. */
+  /* True when this snapshot was found through the request's legacy_candidate rather than under one of the keys it
+  asked for, meaning its name is an Axon Framework 4 payload type and its version an AF4 payload revision, which the
+  caller has to map itself. Never inferred from the key: a caller must branch on this field rather than on whether
+  it recognises the key it got back. */
   bool from_legacy_identifier = 4;
 }
 
@@ -663,6 +651,39 @@ message SnapshotCandidate {
   repeated string acceptable_version = 2;
 }
 
+/* A snapshot Axon Framework 4 stored for an aggregate, to look up when no SnapshotCandidate yields a snapshot - used
+by FindLastSnapshotRequest and SourceWithSnapshotRequest to let a caller start from such a snapshot, for instance by
+upcasting it into its own snapshot format.
+
+AF4 stores its snapshots under the aggregate identifier alone, by its own key convention, both in a context migrated
+from an aggregate-based context and when AF4 appends snapshots to a DCB context. As aggregates of different types may
+share an identifier, entries are matched on payload type as well as revision: the server returns the first entry it
+finds under the aggregate identifier (walking backward from the highest sequence) whose payload type equals
+payload_type and whose revision is in acceptable_revision, matched as an unordered set exactly like
+SnapshotCandidate.acceptable_version.
+
+AF4 records a snapshot's sequence as the sequence of the last event it includes, rather than as the completeness
+watermark described by AddSnapshotRequest.sequence. A snapshot found this way is reported with its sequence already
+translated into the watermark convention, so the caller handles it exactly like any other and sourcing resumes at it
+inclusively. Only the key and the sequence are normalised: the snapshot's name remains the AF4 payload type, and its
+version the AF4 payload revision, which is empty for a snapshot without a revision. The caller can detect such a
+snapshot by SequencedSnapshot.from_legacy_identifier.
+
+Transitional: intended only for contexts holding Axon Framework 4 snapshots, and expected to be removed once Axon
+Framework 4 is no longer in use. */
+message LegacySnapshotCandidate {
+
+  /* The identifier of the aggregate the snapshot was taken of. */
+  string aggregate_identifier = 1;
+
+  /* The payload type of the snapshot, which is the class name of the AF4 aggregate. */
+  string payload_type = 2;
+
+  /* The payload revisions acceptable, where an empty string stands for a snapshot without a revision. Leave empty
+  to accept any revision. */
+  repeated string acceptable_revision = 3;
+}
+
 /* The request to retrieve the snapshot with the highest sequence stored under any of several candidate keys. */
 message FindLastSnapshotRequest {
 
@@ -676,18 +697,10 @@ message FindLastSnapshotRequest {
   by upcasting), without a separate round trip per candidate. */
   repeated SnapshotCandidate candidate = 1;
 
-  /* When set, and no snapshot was found under any candidate, the server additionally looks for the snapshot Axon
-  Framework 4 stored for this aggregate identifier, under AF4's own key convention. Leave unset to disable that
-  lookup entirely.
-
-  Behaves exactly as SourceWithSnapshotRequest.legacy_aggregate_identifier: the sequence is reported already
-  translated into the convention described by AddSnapshotRequest.sequence, while the snapshot's name and version
-  remain AF4 shaped and have to be mapped by the caller, which can detect the need to by
-  SequencedSnapshot.from_legacy_identifier.
-
-  Transitional: intended only for a context migrated from an aggregate-based context, and expected to be removed
-  once Axon Framework 4 is no longer in use. */
-  string legacy_aggregate_identifier = 2;
+  /* When set, and no snapshot was found under any candidate, the server additionally looks for a snapshot Axon
+  Framework 4 stored for an aggregate, as described by LegacySnapshotCandidate. Leave unset to disable that lookup
+  entirely. */
+  LegacySnapshotCandidate legacy_candidate = 2;
 }
 
 /* The response to the FindLastSnapshotRequest. */
